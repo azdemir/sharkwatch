@@ -137,3 +137,42 @@ button { font: inherit; cursor: pointer; }
 .nav a { color: #fff; text-decoration: none; }
 .progress { position: fixed; left: 0; top: 0; height: 3px; background: #00e5ff; z-index: 60; box-shadow: 0 0 20px #00e5ff; }
 .footer { padding: 12vh 6vw 6vh; text-align: center; color: rgba(255,255,255,.6); }
+
+/* ---------- MVP APP PAGES ---------- */
+.appnav { position: sticky; top: 0; z-index: 40; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; padding: 16px 6vw; background: rgba(0,8,18,.85); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,.15); }
+.appnav a { color: #eafcff; text-decoration: none; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 13px; }
+.appnav nav { display: flex; gap: 20px; flex-wrap: wrap; }
+.appbrand { font-weight: 900 !important; letter-spacing: .15em !important; }
+.app { max-width: 1080px; margin: 0 auto; padding: 40px 6vw 80px; }
+.app h1 { font-size: clamp(36px, 6vw, 64px); letter-spacing: -.03em; line-height: 1; }
+.app h2 { margin: 32px 0 12px; }
+.app .sub { color: rgba(234,252,255,.75); line-height: 1.6; margin-top: 12px; max-width: 720px; }
+.field { margin-top: 20px; }
+.field label { display: block; font-size: 12px; letter-spacing: .25em; text-transform: uppercase; color: #7ee7ff; margin-bottom: 8px; }
+.field input, .field select, .field textarea { width: 100%; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.25); border-radius: 12px; color: #fff; padding: 14px; font: inherit; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid #00e5ff; border-color: #00e5ff; }
+.drop { border: 2px dashed rgba(255,255,255,.4); border-radius: 16px; padding: 36px; text-align: center; cursor: pointer; }
+.drop:hover { border-color: #00e5ff; }
+.preview { position: relative; margin-top: 20px; background: #000; border-radius: 16px; overflow: hidden; }
+.preview img, .preview video { width: 100%; max-height: 520px; object-fit: contain; display: block; }
+.bbox { position: absolute; border: 3px solid #00e5ff; box-shadow: 0 0 30px rgba(0,229,255,.5); pointer-events: none; }
+.bbox span { position: absolute; top: -28px; left: 0; background: #00e5ff; color: #00131f; font-weight: 800; font-size: 13px; padding: 4px 10px; white-space: nowrap; }
+.pill { display: inline-block; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; background: rgba(0,229,255,.18); color: #bff6ff; }
+.pill.red { background: rgba(255,59,48,.25); color: #ffb3ad; }
+.pill.green { background: rgba(0,200,120,.22); color: #b6ffd9; }
+.pill.amber { background: rgba(255,180,0,.22); color: #ffe9a8; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 700px){ .row { grid-template-columns: 1fr; } }
+.report-row { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,.15); }
+.report-row b { font-size: 18px; }
+.report-row p { color: rgba(255,255,255,.7); margin-top: 4px; }
+.mini-btn { background: transparent; border: 1px solid rgba(255,255,255,.4); color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 13px; margin: 4px 4px 0 0; }
+.mini-btn:hover { border-color: #00e5ff; }
+.statgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 24px; }
+@media (max-width: 700px){ .statgrid { grid-template-columns: 1fr 1fr; } }
+.stat { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.15); border-radius: 16px; padding: 18px; }
+.stat b { display: block; font-size: 32px; }
+.stat span { color: rgba(255,255,255,.7); font-size: 13px; text-transform: uppercase; letter-spacing: .12em; }
+.mapbox { position: relative; height: 300px; border-radius: 16px; overflow: hidden; margin-top: 20px; background: linear-gradient(180deg, #0a7a9e, #032a4d 60%, #011631); }
+.mapbox .pin { position: absolute; transform: translate(-50%, -100%); font-size: 28px; filter: drop-shadow(0 4px 8px #000); }
+.mapbox .pinlabel { position: absolute; transform: translate(-50%, 0); background: rgba(0,0,0,.7); padding: 2px 8px; border-radius: 8px; font-size: 11px; white-space: nowrap; }

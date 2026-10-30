@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 type Species = {
   name: string;
@@ -75,9 +76,14 @@ export default function Home() {
     return () => clearInterval(id);
   }, []);
 
-  const sendReport = () => {
-    const ref = `SW-${Math.floor(1000 + Math.random() * 9000)}-${new Date().getFullYear()}`;
-    setSentRef(ref);
+  const sendReport = async () => {
+    try {
+      const res = await fetch("/api/reports", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ species, location, source: "PUBLIC" }) });
+      const data = await res.json();
+      setSentRef(data.report?.ref ?? `SW-${Math.floor(1000 + Math.random() * 9000)}-${new Date().getFullYear()}`);
+    } catch {
+      setSentRef(`SW-${Math.floor(1000 + Math.random() * 9000)}-${new Date().getFullYear()}`);
+    }
   };
 
   return (
@@ -85,7 +91,7 @@ export default function Home() {
       <div id="progress" className="progress" />
       <nav className="nav">
         <a href="#top">Sharkwatch ◉</a>
-        <span>Drone • AI • Alert</span>
+        <span><Link href="/detect" style={{ marginRight: 16 }}>Detect</Link><Link href="/alerts" style={{ marginRight: 16 }}>Alerts</Link><Link href="/dashboard">Dashboard</Link></span>
         <a href="#report" onClick={(e) => { e.preventDefault(); setReportOpen(true); }}>Report →</a>
       </nav>
 
@@ -113,6 +119,7 @@ export default function Home() {
             <div><b>120m</b>Cruising altitude</div>
           </div>
           <button className="cta" onClick={() => setReportOpen(true)}>Report a sighting →</button>
+          <Link href="/detect" className="cta secondary" style={{ textDecoration: "none" }}>Try detection →</Link>
           <button className="cta secondary" onClick={() => document.getElementById("live")?.scrollIntoView({ behavior: "smooth" })}>Watch live feed</button>
           <p style={{ marginTop: 22, opacity: 0.6, letterSpacing: ".25em", fontSize: 12 }}>SCROLL TO DIVE ↓ &nbsp; DEPTH {Math.round(depth * 100)}%</p>
         </div>
@@ -174,6 +181,8 @@ export default function Home() {
           </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
             <button className="cta" onClick={() => setReportOpen(true)}>Report to authorities →</button>
+            <Link href="/alerts" className="cta secondary" style={{ textDecoration: "none" }}>View live alerts →</Link>
+            <Link href="/dashboard" className="cta secondary" style={{ textDecoration: "none" }}>Authority dashboard →</Link>
           </div>
         </div>
       </section>
