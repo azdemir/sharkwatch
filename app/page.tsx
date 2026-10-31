@@ -129,7 +129,7 @@ export default function Home() {
       <section className="scene" id="live">
         <div className="scene-inner">
           <p className="eyebrow">02 — Drone feed • Simulated live view</p>
-          <h2 className="giant" style={{ fontSize: "clamp(48px, 10vw, 160px)" }}>It sees<br />before you do.</h2>
+          <h2 className="giant" style={{ fontSize: "clamp(36px, 5.5vw, 88px)" }}>It sees<br />before you do.</h2>
           <div className="viewfinder" style={{ marginTop: 32 }}>
             <Image src="/sharks/great-white.webp" alt="Aerial drone view of a great white shark" width={1400} height={800} priority />
             <div className="hud"><span>● REC &nbsp; DRONE 07</span><span>ALT 120M • 32.7°N</span><span>{clock}</span></div>
@@ -145,7 +145,7 @@ export default function Home() {
       <section className="scene">
         <div className="scene-inner">
           <p className="eyebrow">03 — How it works</p>
-          <h2 className="giant" style={{ fontSize: "clamp(48px, 11vw, 180px)" }}>Drone.<br />Detect.<br />Alert.</h2>
+          <h2 className="giant" style={{ fontSize: "clamp(36px, 6vw, 96px)" }}>Drone.<br />Detect.<br />Alert.</h2>
           <div className="flow">
             <div><span>01</span><h3>Drone patrols</h3><p>Autonomous drones sweep beaches and surf breaks on a loop, streaming 4K top-down ocean video.</p></div>
             <div><span>02</span><h3>AI identifies</h3><p>On-device vision classifies species, size, speed and direction — and ignores dolphins, rays and shadows.</p></div>
@@ -200,7 +200,7 @@ export default function Home() {
           {!sentRef ? (
             <>
               <p className="eyebrow">Report to authorities</p>
-              <h2 className="giant" style={{ fontSize: "clamp(48px, 9vw, 140px)" }}>Report<br />a shark.</h2>
+              <h2 className="giant" style={{ fontSize: "clamp(36px, 5.5vw, 88px)" }}>Report<br />a shark.</h2>
               <label>Species seen</label>
               <div className="species-pick">
                 {["Great White", "Hammerhead", "Tiger", "Bull", "Mako", "Not sure"].map((n) => (
@@ -217,7 +217,7 @@ export default function Home() {
           ) : (
             <>
               <p className="eyebrow">Alert sent ✓</p>
-              <h2 className="giant" style={{ fontSize: "clamp(48px, 9vw, 140px)" }}>Thank<br />you.</h2>
+              <h2 className="giant" style={{ fontSize: "clamp(36px, 5.5vw, 88px)" }}>Thank<br />you.</h2>
               <p className="lede">Your {species} sighting{location ? ` at ${location}` : ""} was logged for lifeguards and local authorities.</p>
               <p style={{ fontSize: 32, fontWeight: 900, marginTop: 28, letterSpacing: ".05em" }}>Reference: {sentRef}</p>
               <button className="cta" onClick={() => { setReportOpen(false); setSentRef(""); }}>Back to the ocean →</button>
