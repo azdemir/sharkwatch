@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import type { DiveStage as DiveStageData } from "@/lib/descent";
 
 type DiveStageProps = {
@@ -9,6 +9,7 @@ type DiveStageProps = {
   videoPaused?: boolean;
   videoRef?: RefObject<HTMLVideoElement>;
   onToggleVideo?: () => void;
+  overlay?: ReactNode;
 };
 
 export default function DiveStage({
@@ -19,6 +20,7 @@ export default function DiveStage({
   videoPaused = false,
   videoRef,
   onToggleVideo,
+  overlay,
 }: DiveStageProps) {
   return (
     <section className="descent-stage" id={stage.id}>
@@ -64,6 +66,7 @@ export default function DiveStage({
             </div>
           ))}
         </div>
+        {overlay ? <div className="descent-hero-model">{overlay}</div> : null}
         {isHero && onToggleVideo ? (
           <div className="descent-scroll-cue">
             <span />

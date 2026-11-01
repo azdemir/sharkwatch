@@ -194,7 +194,20 @@ export default function Home() {
 
   // Stage facts become model-derived when the model has answered, and
   // stay on the original static copy while it loads or if it fails.
+  // The hero itself carries the model too, so the demo starts at the top
+  // of the page instead of only in the model section further down.
   const stages = DESCENT_STAGES.map((stage) => {
+    if (stage.id === "surface" && detection && beach && latestReport) {
+      return {
+        ...stage,
+        facts: [
+          { label: "Model — detected", value: detection.species },
+          { label: "Confidence", value: `${detection.confidence}%` },
+          { label: "Beach status", value: beach.label },
+          { label: "Latest report", value: latestReport.ref },
+        ],
+      };
+    }
     if (stage.id === "d10" && detection) {
       return {
         ...stage,
@@ -242,6 +255,57 @@ export default function Home() {
 
   const [hero, ...restStages] = stages;
 
+  const heroOverlay = modelLoading ? (
+    <p className="descent-mono">Demo model — running detection…</p>
+  ) : detection ? (
+    <>
+      <p className="descent-mono">
+        Demo model · {detection.species} · {detection.confidence}% ·{" "}
+        {detection.risk} · {detection.action}
+      </p>
+      {beach ? (
+        <p className="descent-mono">Beach status: {beach.label}</p>
+      ) : null}
+      <div className="descent-hero-model-actions">
+        <button
+          type="button"
+          className="descent-btn"
+          onClick={() => void loadModel()}
+        >
+          Re-run detection
+        </button>
+        <button
+          type="button"
+          className="descent-btn solid"
+          onClick={() => void logDetectionAsReport()}
+          disabled={loggingBusy}
+        >
+          {loggingBusy ? "Logging…" : "Log as report"}
+        </button>
+        <Link href="/demo" className="descent-btn" style={{ textDecoration: "none" }}>
+          Open Demo →
+        </Link>
+        <a
+          href="http://localhost:5173/"
+          target="_blank"
+          rel="noreferrer"
+          className="descent-btn"
+          style={{ textDecoration: "none" }}
+        >
+          Open 5173 demo ↗
+        </a>
+      </div>
+      {loggedRef ? (
+        <p className="descent-mono">Logged as {loggedRef}.</p>
+      ) : null}
+    </>
+  ) : (
+    <p className="descent-mono">
+      Demo model unavailable — showing the static Descent copy.{" "}
+      <Link href="/demo">Open Demo →</Link>
+    </p>
+  );
+
   return (
     <div className="descent-page">
       <nav className="descent-nav">
@@ -287,6 +351,7 @@ export default function Home() {
         videoPaused={videoPaused}
         videoRef={videoRef}
         onToggleVideo={toggleVideo}
+        overlay={heroOverlay}
       />
 
       <section className="descent-model" id="model">

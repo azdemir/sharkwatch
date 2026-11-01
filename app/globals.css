@@ -267,3 +267,8 @@ button { font: inherit; cursor: pointer; }
 .demo-start pre { background: #00131f; border: 1px solid rgba(255,255,255,.15); padding: 20px; overflow-x: auto; line-height: 2; }
 .demo-consoles ul { line-height: 2.2; }
 .demo-consoles a { color: #7ee7ff; }
+.descent-hero-model { margin-top: 26px; background: rgba(1,8,14,.55); border: 1px solid rgba(238,244,243,.25); padding: 20px 22px; max-width: 760px; }
+.descent-hero-model p { margin: 0 0 10px; color: #e6f0f2; }
+.descent-hero-model a { color: #fff; }
+.descent-hero-model-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+.descent-hero-model-actions .descent-btn { margin-top: 0; padding: 12px 18px; }
