@@ -10,6 +10,8 @@ import {
   DESCENT_STAGES,
   DESCENT_VIDEO,
 } from "@/lib/descent";
+import { beachStatus } from "@/lib/types";
+import type { Detection, Report } from "@/lib/types";
 
 const BUBBLES = [
   { left: "8%", size: 10, dur: 14, delay: 0 },
@@ -32,6 +34,90 @@ export default function Home() {
   const [progress, setProgress] = useState(0);
   const [videoPaused, setVideoPaused] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Wired to the existing MVP model (master branch code, unchanged on dev):
+  // lib/detect.ts via POST /api/detect, and lib/store.ts via GET /api/reports.
+  // Nothing is created automatically — logging a report only happens when
+  // the user presses the button below, so loading the landing is side-effect free.
+  const [reports, setReports] = useState<Report[] | null>(null);
+  const [detection, setDetection] = useState<Detection | null>(null);
+  const [modelLoading, setModelLoading] = useState(true);
+  const [modelError, setModelError] = useState("");
+  const [loggingBusy, setLoggingBusy] = useState(false);
+  const [loggedRef, setLoggedRef] = useState("");
+
+  const loadModel = async () => {
+    setModelLoading(true);
+    setModelError("");
+    try {
+      const [reportsRes, detectRes] = await Promise.all([
+        fetch("/api/reports"),
+        fetch("/api/detect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fileName: "great-white.jpg",
+            fileSize: 0,
+            kind: "image",
+          }),
+        }),
+      ]);
+      if (!reportsRes.ok || !detectRes.ok) {
+        throw new Error("Model APIs did not respond");
+      }
+      const reportsData = await reportsRes.json();
+      const detectData = await detectRes.json();
+      setReports(Array.isArray(reportsData.reports) ? reportsData.reports : []);
+      setDetection(detectData.detection ?? null);
+    } catch {
+      // Fall back to the static Descent copy — the page must never break
+      // just because the model APIs are unreachable.
+      setModelError("Model APIs unreachable — showing the static Descent copy.");
+    } finally {
+      setModelLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadModel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const logDetectionAsReport = async () => {
+    if (!detection) return;
+    setLoggingBusy(true);
+    setLoggedRef("");
+    try {
+      const beach = reports?.find((r) =>
+        ["NEW", "VERIFIED", "DISPATCHED"].includes(r.status),
+      )?.beach;
+      const res = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          species: detection.species,
+          beach: beach ?? "Bondi Beach",
+          source: "DRONE_AI",
+          confidence: detection.confidence,
+          sizeM: detection.estimatedLengthM,
+          notes: `Demo detection from the Descent landing: ${detection.explanation[0] ?? ""}`,
+        }),
+      });
+      const data = await res.json();
+      if (data.report?.ref) {
+        setLoggedRef(data.report.ref);
+        const refreshed = await fetch("/api/reports");
+        const refreshedData = await refreshed.json();
+        setReports(
+          Array.isArray(refreshedData.reports) ? refreshedData.reports : [],
+        );
+      }
+    } catch {
+      setModelError("Could not log that detection as a report.");
+    } finally {
+      setLoggingBusy(false);
+    }
+  };
 
   useEffect(() => {
     let raf = 0;
@@ -100,7 +186,61 @@ export default function Home() {
     }
   };
 
-  const [hero, ...restStages] = DESCENT_STAGES;
+  const activeReport = reports?.find((r) =>
+    ["NEW", "VERIFIED", "DISPATCHED"].includes(r.status),
+  );
+  const latestReport = reports?.[0];
+  const beach = reports ? beachStatus(reports) : null;
+
+  // Stage facts become model-derived when the model has answered, and
+  // stay on the original static copy while it loads or if it fails.
+  const stages = DESCENT_STAGES.map((stage) => {
+    if (stage.id === "d10" && detection) {
+      return {
+        ...stage,
+        facts: [
+          { label: "Model — detected", value: detection.isShark ? "Shark" : "Not a shark" },
+          { label: "Species", value: detection.species },
+          { label: "Confidence", value: `${detection.confidence}%` },
+          { label: "Length", value: `${detection.estimatedLengthM.toFixed(1)} m` },
+        ],
+      };
+    }
+    if (stage.id === "d30" && detection) {
+      return {
+        ...stage,
+        facts: [
+          { label: "Species", value: detection.species },
+          { label: "Confidence", value: `${detection.confidence}%` },
+          { label: "Risk", value: detection.risk },
+          { label: "Moving", value: `${detection.direction} · ${detection.speedKt} kt` },
+        ],
+      };
+    }
+    if (stage.id === "d80" && beach && activeReport) {
+      return {
+        ...stage,
+        facts: [
+          { label: "Beach status", value: beach.label },
+          { label: "Latest report", value: activeReport.ref },
+          { label: "Species", value: activeReport.species },
+        ],
+      };
+    }
+    return stage;
+  });
+
+  const sequence =
+    detection && latestReport
+      ? [
+          { label: "Sighted", value: latestReport.species },
+          { label: "Confirmed", value: `${detection.confidence}%` },
+          { label: "Alert sent", value: latestReport.status },
+          { label: "Acknowledged", value: latestReport.ref },
+        ]
+      : DESCENT_SEQUENCE;
+
+  const [hero, ...restStages] = stages;
 
   return (
     <div className="descent-page">
@@ -148,6 +288,98 @@ export default function Home() {
         onToggleVideo={toggleVideo}
       />
 
+      <section className="descent-model" id="model">
+        <div className="descent-rv">
+          <div className="descent-mono" style={{ color: "#9db4bc" }}>
+            Model · Live on this page · Demo detector, not a real SAM model
+          </div>
+          <h2>
+            The model, <em>not just the story.</em>
+          </h2>
+          <p>
+            This section reads the same code the Detect page uses:{" "}
+            <code>lib/detect.ts</code> through <code>POST /api/detect</code>{" "}
+            and <code>lib/store.ts</code> through <code>GET /api/reports</code>.
+            The stages below now carry these numbers instead of hardcoded copy.
+          </p>
+          {modelLoading ? (
+            <p className="descent-mono" style={{ marginTop: 28 }}>
+              Running demo detection…
+            </p>
+          ) : modelError && !detection && !reports ? (
+            <p className="descent-mono" style={{ marginTop: 28 }}>
+              {modelError}
+            </p>
+          ) : (
+            <>
+              {detection ? (
+                <div className="descent-model-grid descent-mono">
+                  <div>
+                    Species<span><b>{detection.species}</b></span>
+                  </div>
+                  <div>
+                    Confidence<span><b>{detection.confidence}%</b></span>
+                  </div>
+                  <div>
+                    Risk<span><b>{detection.risk}</b></span>
+                  </div>
+                  <div>
+                    Length<span><b>{detection.estimatedLengthM.toFixed(1)} m</b></span>
+                  </div>
+                  <div>
+                    Tracking<span><b>{detection.direction} · {detection.speedKt} kt</b></span>
+                  </div>
+                  <div>
+                    Box<span><b>{detection.bbox.x}, {detection.bbox.y} · {detection.bbox.w}×{detection.bbox.h}</b></span>
+                  </div>
+                </div>
+              ) : null}
+              {detection ? <p>{detection.action}</p> : null}
+              {latestReport ? (
+                <p className="descent-mono" style={{ marginTop: 20 }}>
+                  Latest report: {latestReport.ref} · {latestReport.species} ·{" "}
+                  {latestReport.beach} · {latestReport.status}
+                </p>
+              ) : null}
+              {beach ? (
+                <p className="descent-mono" style={{ marginTop: 8 }}>
+                  Beach status: {beach.label} — {beach.detail}
+                </p>
+              ) : null}
+              <div style={{ marginTop: 28, display: "flex", gap: 16, flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className="descent-btn"
+                  onClick={() => void loadModel()}
+                  disabled={modelLoading}
+                >
+                  Re-run detection
+                </button>
+                <button
+                  type="button"
+                  className="descent-btn solid"
+                  onClick={() => void logDetectionAsReport()}
+                  disabled={!detection || loggingBusy}
+                >
+                  {loggingBusy ? "Logging…" : "Log this detection as a report"}
+                </button>
+                <Link href="/detect" className="descent-btn" style={{ textDecoration: "none", display: "inline-block" }}>
+                  Open Detect →
+                </Link>
+              </div>
+              {loggedRef ? (
+                <p className="descent-mono" style={{ marginTop: 20 }}>
+                  Logged as {loggedRef} — it now appears in Alerts and Dashboard.
+                </p>
+              ) : null}
+              {modelError ? (
+                <p className="descent-mono" style={{ marginTop: 20 }}>{modelError}</p>
+              ) : null}
+            </>
+          )}
+        </div>
+      </section>
+
       {restStages.map((stage) => (
         <div key={stage.id} className="descent-rv">
           <DiveStage stage={stage} />
@@ -170,7 +402,7 @@ export default function Home() {
             an exercise — always.
           </p>
           <div className="descent-seq descent-mono">
-            {DESCENT_SEQUENCE.map((step) => (
+            {sequence.map((step) => (
               <div key={step.label}>
                 {step.label}
                 <span>
@@ -245,9 +477,9 @@ export default function Home() {
                     <Link href="/detect">Detect</Link> a sample,{" "}
                     <Link href="/report">file a report</Link>, watch it in{" "}
                     <Link href="/alerts">Alerts</Link>, and manage it in the{" "}
-                    <Link href="/dashboard">Authority dashboard</Link>. Those
-                    pages and APIs are the existing MVP, unchanged on this
-                    branch.
+                    <Link href="/dashboard">Authority dashboard</Link>. The
+                    landing above now reads those same APIs, instead of
+                    hardcoded copy.
                   </p>
                 </div>
               </div>
@@ -271,7 +503,7 @@ export default function Home() {
           <b style={{ letterSpacing: ".22em", fontSize: 13, color: "#fff" }}>
             SHARKWATCH
           </b>{" "}
-          — The Descent · TypeScript MVP · develop branch
+          — The Descent · TypeScript MVP · dev branch · model wired in
         </span>
         <span className="descent-mono">
           Photorealistic imagery created for this page · Simulated feed ·
