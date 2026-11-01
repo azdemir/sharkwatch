@@ -248,6 +248,7 @@ export default function Home() {
         <b>SHARKWATCH</b>
         <span className="descent-mono">The Descent · Simulated feed</span>
         <span className="descent-nav-links">
+          <Link href="/demo">Demo →</Link>
           <Link href="/detect">Detect</Link>
           <Link href="/alerts">Alerts</Link>
           <Link href="/dashboard">Dashboard</Link>
@@ -365,6 +366,9 @@ export default function Home() {
                 </button>
                 <Link href="/detect" className="descent-btn" style={{ textDecoration: "none", display: "inline-block" }}>
                   Open Detect →
+                </Link>
+                <Link href="/demo" className="descent-btn solid" style={{ textDecoration: "none", display: "inline-block" }}>
+                  Open Demo →
                 </Link>
               </div>
               {loggedRef ? (

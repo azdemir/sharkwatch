@@ -5,6 +5,7 @@ export default function AppNav() {
     <header className="appnav">
       <Link href="/" className="appbrand">SHARKWATCH ◉</Link>
       <nav>
+        <Link href="/demo">Demo</Link>
         <Link href="/detect">Detect</Link>
         <Link href="/report">Report</Link>
         <Link href="/alerts">Alerts</Link>

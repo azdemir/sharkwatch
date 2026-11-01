@@ -250,3 +250,20 @@ button { font: inherit; cursor: pointer; }
 .descent-model-grid b { display: block; font-family: Palatino, Georgia, serif; font-weight: 400; font-size: 28px; color: #fff; text-transform: none; letter-spacing: 0; margin-top: 8px; }
 .descent-model .descent-btn:disabled { opacity: .5; cursor: default; }
 @media (max-width: 820px) { .descent-model-grid { grid-template-columns: 1fr; } }
+.demo-page p { color: rgba(234,252,255,.85); line-height: 1.7; max-width: 760px; }
+.demo-page code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: rgba(255,255,255,.08); padding: 2px 7px; }
+.demo-eyebrow { font-family: ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #7ee7ff; }
+.demo-status { margin-top: 28px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 15px; }
+.demo-dot { width: 12px; height: 12px; border-radius: 50%; background: #ffb454; }
+.demo-dot.up { background: #2fd67a; box-shadow: 0 0 12px rgba(47,214,122,.8); }
+.demo-dot.down { background: #ff5a4d; }
+.demo-actions { margin-top: 28px; display: flex; gap: 16px; flex-wrap: wrap; }
+.demo-btn { border: 1px solid #fff; background: transparent; color: #fff; padding: 16px 26px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; font-weight: 750; text-decoration: none; display: inline-block; font-family: inherit; }
+.demo-btn.solid { background: #ffb454; border-color: #ffb454; color: #000; }
+.demo-btn:disabled { opacity: .5; cursor: default; }
+.demo-preview { margin-top: 48px; }
+.demo-preview iframe { width: 100%; height: 70vh; min-height: 480px; border: 1px solid rgba(255,255,255,.25); background: #000; margin-top: 16px; }
+.demo-start { margin-top: 48px; border: 1px solid rgba(255,255,255,.2); padding: 28px; background: rgba(255,255,255,.04); }
+.demo-start pre { background: #00131f; border: 1px solid rgba(255,255,255,.15); padding: 20px; overflow-x: auto; line-height: 2; }
+.demo-consoles ul { line-height: 2.2; }
+.demo-consoles a { color: #7ee7ff; }
