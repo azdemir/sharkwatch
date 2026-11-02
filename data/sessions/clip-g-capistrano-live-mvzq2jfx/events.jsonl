@@ -1,0 +1,2 @@
+{"type":"session.started","clipId":"clip-g-capistrano","mode":"live","fps":10,"playbackFps":30,"width":1280,"height":720,"frameCount":191,"beachName":"Capistrano Beach, Dana Point, CA","sessionId":"clip-g-capistrano-live-mvzq2jfx","seq":0,"t":0}
+{"type":"session.ended","reason":"error","message":"spawn /Users/azizdemir/Desktop/sharkwatch/.next/server/vendor-chunks/ffmpeg ENOENT","costUsd":0,"sessionId":"clip-g-capistrano-live-mvzq2jfx","seq":1,"t":0.001}
