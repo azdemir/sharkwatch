@@ -176,7 +176,7 @@ and nothing else at runtime.
 
 - `GET/POST /api/reports` — reports (new reports broadcast to Telegram when configured)
 - `POST /api/detect` — detection endpoint
-- `GET /api/health` — health, including `uploads` (false on Vercel) and Telegram status
+- `GET /api/health` — health, including `live` (false on Vercel, even with a key set) and `uploads` (false on Vercel) and Telegram status
 - `GET /api/telegram` — Telegram status (configured, bot username, subscribers); `POST` sends a test broadcast
 - Demo APIs: `GET /api/clips`, `GET /api/recordings`, `GET/POST /api/sessions`, `GET /api/sessions/[id]/events` (SSE), `POST /api/sessions/[id]/stop`, `GET /api/sessions/[id]/evidence/[file]`, `GET /api/alerts`, `GET /api/alerts/stream` (SSE), `POST /api/alerts/[id]/ack`, `POST /api/alerts/[id]/resolve`, `GET /api/alerts/[id]/cap.xml`
 - `POST /api/uploads` — local only; returns a plain local-only message (501) on Vercel

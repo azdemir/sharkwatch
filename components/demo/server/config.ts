@@ -28,6 +28,15 @@ export function liveAvailable(): boolean {
   return Boolean(config.modelApiKey);
 }
 
+/** True only when Live can actually run on THIS server. A key alone is
+ * not enough: Live sessions need a writable session directory and a
+ * long-running server, which Vercel serverless does not have — the same
+ * reasons uploads are local-only. On Vercel this is false even when a
+ * Meta key is set, so the demo must offer Replay only there. */
+export function liveSupported(): boolean {
+  return liveAvailable() && uploadsAvailable();
+}
+
 /** Uploads (and therefore Live over uploaded footage) need a writable disk,
  * yt-dlp for YouTube links, and a long-running server for SAM/Spark sessions.
  * Vercel serverless has none of those: /var/task is read-only (uploads hit

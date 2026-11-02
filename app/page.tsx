@@ -300,14 +300,68 @@ export default function Home() {
               </p>
             </div>
             <div>
-              <h3>Live — SAM 3.1 + Muse Spark</h3>
+              <h3>Live — SAM 3.1 + Muse Spark, local only</h3>
               <p>
-                Runs the models on footage as it plays, about $0.03–0.20
-                per patrol, under $1 for all five recorded clips. Live is
-                being ported into this one-server demo; until it lands,
-                uploaded footage is preview-only.
+                Runs the models on footage as it plays, locally, with a
+                Meta key in .env. It does not run on this public Vercel
+                site: here the demo is Replay only, with no uploads and
+                no new API calls. Run it locally with npm run dev to use
+                Live and uploads.
               </p>
             </div>
+          </div>
+          <div style={{ borderTop: "1px solid rgba(238,244,243,.18)", marginTop: 28, paddingTop: 24 }}>
+            <h3>Measured in Replay — not a promise</h3>
+            <p>
+              These numbers come from the recorded runs themselves, not
+              from a live deployment. Replay makes no new API calls, so
+              its cost is the recorded cost of the original Live run.
+              There are 7 recorded patrols in Replay.
+            </p>
+            <div className="how-mode-grid">
+              <div>
+                <h3>Capistrano Beach, 19.1 s</h3>
+                <p>
+                  191 frames at 10 fps. The shark was first seen at frame
+                  34. Muse Spark verification took 5,087 ms, at 85%
+                  confidence, with a white-shark species guess at low
+                  species confidence and an evidence length of about
+                  2.6 m. Recorded cost: $0.005.
+                </p>
+              </div>
+              <div>
+                <h3>Screened out, not alerted</h3>
+                <p>
+                  In the same Capistrano run, a person track was seen for
+                  only 2 frames, then dropped. It never became an alert —
+                  the 8-frame rule is what stops a flash from becoming an
+                  alarm.
+                </p>
+              </div>
+              <div>
+                <h3>Cost, recorded</h3>
+                <p>
+                  Capistrano $0.005. The swimmer clip (clip-b) recorded
+                  $0.042. That is the recorded range for those two runs
+                  only — not a price for every beach, and not a
+                  subscription. Replay itself costs $0 in new calls.
+                </p>
+              </div>
+            </div>
+            <p>
+              What this does not prove: no lifeguard has piloted
+              SharkWatch on a real beach yet, no accuracy percentage is
+              claimed, and Replay agencies and locations are simulated.
+              Bites are already extremely rare — the Why page cites ISAF
+              at 1 in 4,332,817 for a fatal encounter — so the claim here
+              is faster warning, not a safe ocean.
+            </p>
+            <p>
+              Pilot ask: one beach, one lifeguard contact, and permission
+              to run Replay on that beach&apos;s own drone footage, then a
+              Telegram alert test. No partner is claimed until one says
+              yes.
+            </p>
           </div>
           <div className="how-cta">
             <Link href="/demo" className="descent-btn solid" style={{ textDecoration: "none", display: "inline-block" }}>
@@ -354,7 +408,7 @@ export default function Home() {
             <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13 }}>
               <span style={{ color: "#9db4bc" }}>Node 22.12+</span>
               <span style={{ color: "#9db4bc" }}>Replay: free, no keys</span>
-              <span style={{ color: "#9db4bc" }}>Live: ~$0.03–0.20/patrol</span>
+              <span style={{ color: "#9db4bc" }}>Live: local only, see Measured runs above</span>
               <span style={{ color: "#9db4bc" }}>MIT License</span>
             </div>
           </div>

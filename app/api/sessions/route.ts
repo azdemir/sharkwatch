@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server';
 import { listRecordings, LiveUnavailableError, startLiveClipSession, startLiveSession, startReplaySession } from '@/components/demo/server/sessions';
+import { liveSupported } from '@/components/demo/server/config';
 import { loadUploadManifest, uploadDir } from '@/components/demo/server/uploads';
 export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   if (body.mode === 'live') {
+    // Fail fast on Vercel, before any session directory is written:
+    // Live needs a writable, long-running server, which Vercel
+    // serverless does not have, even when a Meta key is set there.
+    if (!liveSupported()) {
+      return NextResponse.json({ error: 'Live detection does not run on Vercel. Run the demo locally with npm run dev and a Meta key for Live; on Vercel, Replay clips work.' }, { status: 501 });
+    }
     try {
       // Uploaded footage: the same Live pipeline, over the upload's manifest
       // in data/uploads/<id>/, analysed as fast as the API allows.

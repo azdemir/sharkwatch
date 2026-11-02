@@ -5,6 +5,8 @@ import type { ClipScene } from './manifest.ts';
 export interface HealthInfo {
   ok: boolean;
   live: boolean;
+  liveKeyConfigured?: boolean;
+  environment?: string;
   uploads?: boolean;
   livePasscodeRequired: boolean;
   telegram: boolean;

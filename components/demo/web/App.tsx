@@ -173,9 +173,11 @@ export function App() {
             <span>{mode === 'live' ? 'LIVE · PAID META CALLS' : 'REPLAY · NO NEW API CALLS'}</span>
             <span title="Meta Model API cost for this session">API ${state.costUsd.toFixed(3)}</span>
           </span>
-          <button type="button" className="upload-btn" onClick={() => setShowUpload((v) => !v)}>
-            Upload video
-          </button>
+          {health?.uploads !== false && (
+            <button type="button" className="upload-btn" onClick={() => setShowUpload((v) => !v)}>
+              Upload video
+            </button>
+          )}
           <input
             ref={uploadRef}
             type="file"
@@ -191,6 +193,16 @@ export function App() {
       </header>
 
       <div className="mx-auto flex w-full max-w-[1560px] flex-col gap-5 px-4 pb-8 pt-7 sm:px-6 lg:px-7">
+        {health && health.uploads === false && (
+          <section className={`${card} px-5 py-4`}>
+            <p className="text-[13px] leading-[1.6] text-ink-2"><b className="text-ink">Public demo (Vercel) — Replay only.</b> The 7 recorded patrols below run with no new API calls and no key. Live detection and uploads do not run here, even when a Meta key is set, because Vercel has a read-only filesystem and no long-running server for SAM/Spark sessions. Run locally with <span className="font-mono">npm run dev</span> and a Meta key for Live and uploads.</p>
+          </section>
+        )}
+        {health && health.uploads !== false && health.live && (
+          <section className={`${card} px-5 py-4`}>
+            <p className="text-[13px] leading-[1.6] text-ink-2"><b className="text-ink">Local demo — Replay and Live.</b> Replay is free and makes no new API calls. Live runs SAM 3.1 + Muse Spark on new footage and uses paid Meta calls.</p>
+          </section>
+        )}
         {showUpload && (
           <section className={`${card} px-5 py-5`}>
             <div className="flex flex-wrap items-baseline justify-between gap-3">
@@ -227,10 +239,12 @@ export function App() {
             </div>
             <p className="mt-3 text-[12px] leading-[1.6] text-ink-3">
               Paste a direct video link (for example an .mp4 link), or a YouTube link copied from
-              YouTube — YouTube links are downloaded with yt-dlp on this Mac, so yt-dlp must be
-              installed (brew install yt-dlp) or the download will say so plainly. When you run
-              Live detection from the preview card, the server downloads that same link and
-              analyses it. A YouTube preview will not play in the browser until it is downloaded.
+              YouTube — YouTube links are downloaded with yt-dlp on the machine running this
+              server, so yt-dlp must be installed (brew install yt-dlp on a Mac) or the download
+              will say so plainly. Uploads and Live are local only and are not offered on the
+              public Vercel demo. When you run Live detection from the preview card, the server
+              downloads that same link and analyses it. A YouTube preview will not play in the
+              browser until it is downloaded.
             </p>
           </section>
         )}
@@ -307,7 +321,7 @@ export function App() {
           </select>
           <div className="seg" role="radiogroup" aria-label="Mode">
             {(['replay', 'live'] as const).map((m) => (
-              <button key={m} type="button" role="radio" aria-checked={mode === m} disabled={running || (m === 'live' && !health?.live)} title={m === 'live' && !health?.live ? 'Live mode needs a Meta key: add MODEL_API_KEY (or META_KEY) to .env, then restart' : undefined} onClick={() => setMode(m)} className={mode === m ? 'on' : ''}>{m}</button>
+              <button key={m} type="button" role="radio" aria-checked={mode === m} disabled={running || (m === 'live' && !health?.live)} title={m === 'live' && !health?.live ? (health?.uploads === false ? 'Live does not run on Vercel — run locally with npm run dev and a Meta key' : 'Live mode needs a Meta key: add MODEL_API_KEY (or META_KEY) to .env, then restart') : undefined} onClick={() => setMode(m)} className={mode === m ? 'on' : ''}>{m}</button>
             ))}
           </div>
           {running ? (
