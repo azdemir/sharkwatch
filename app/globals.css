@@ -343,3 +343,26 @@ button { font: inherit; cursor: pointer; }
 .descent-hero-model a { color: #fff; }
 .descent-hero-model-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
 .descent-hero-model-actions .descent-btn { margin-top: 0; padding: 12px 18px; }
+/* Mobile: the site had almost no small-screen rules — nav, hero heading,
+ * paddings and the tracker label were all desktop-sized, so a phone got a
+ * cramped nav, a 50px hero heading and 32px side gutters. These keep the
+ * same layout, just sized for a phone. The !important on the hero h2 is
+ * needed because its size is set inline in app/page.tsx. */
+@media (max-width: 700px) {
+  .descent-nav { padding: 14px 16px; }
+  .descent-nav img { width: 150px !important; }
+  .descent-inner { padding: 0 20px 32px; }
+  #surface .descent-inner { padding: 92px 20px 24px; }
+  .descent-hero-model { padding: 20px 0; max-width: 100%; }
+  .descent-hero-model h2 { font-size: 42px !important; }
+  .descent-stage h1, .descent-stage .descent-h2 { font-size: 34px; }
+  .descent-stage p { font-size: 16px; }
+  .descent-data { gap: 20px; }
+  .descent-footer { padding: 40px 20px 32px; }
+  .descent-btn { padding: 14px 20px; }
+  .hero-tracker-label { font-size: 10px; padding: 3px 6px; bottom: -24px; }
+  .contact-main { padding: 120px 20px 60px; }
+  .contact-main h1 { font-size: 36px; }
+  .contact-intro { font-size: 16px; }
+  .contact-form input, .contact-form textarea { font-size: 16px; }
+}
