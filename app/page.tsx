@@ -186,6 +186,7 @@ export default function Home() {
       <DiveStage
         stage={hero}
         isHero
+        tracker
         video={DESCENT_VIDEO}
         poster={DESCENT_POSTER}
         videoPaused={videoPaused}
@@ -193,11 +194,11 @@ export default function Home() {
         onToggleVideo={toggleVideo}
         overlay={
           <>
-            <h2 style={{ fontSize: "clamp(44px, 6vw, 88px)", margin: "0 0 12px", lineHeight: 1.05 }}>
+            <h2 style={{ fontSize: "clamp(50px, 4.5vw, 100px)", margin: "0 0 12px", lineHeight: 1.00 }}>
               The model, <em style={{ fontFamily: "Palatino, Georgia, serif", fontStyle: "italic", fontWeight: 400, color: "#90e0c8" }}>not just the story.</em>
             </h2>
             <p style={{ fontSize: 16, color: "#c4d6db", lineHeight: 1.6, maxWidth: 420, margin: "0 0 20px" }}>
-              SharkWatch doesn't just show you footage — it understands it. Every frame is analyzed by Meta SAM 3.1 for detection and Muse Spark for verification, so you know exactly what's in the water before any alert goes out.
+              SharkWatch doesn't just show you footage, it understands it. Every frame is analyzed by Meta SAM 3.1 for detection and Muse Spark for verification, so you know exactly what's in the water before any alert goes out.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
               <div style={{ flex: 1, minWidth: 160 }}>
@@ -227,31 +228,6 @@ export default function Home() {
           <DiveStage stage={stage} />
         </div>
       ))}
-
-      <section className="descent-return" id="return">
-        <div className="descent-rv">
-          <h2>
-            You came back up.
-            <br />
-            <em>Now run it yourself.</em>
-          </h2>
-          <p>
-            Replay is a recorded run of the real pipeline, at real-time speed,
-            free with no key. Live runs SAM 3.1 and Muse Spark on the footage
-            as it plays, about $0.03–0.20 per patrol, under $1 for all five
-            clips.
-          </p>
-          <div style={{ marginTop: 32, display: "flex", gap: 16, flexWrap: "wrap" }}>
-            <Link
-              href="/demo"
-              className="descent-btn solid"
-              style={{ textDecoration: "none", display: "inline-block" }}
-            >
-              Try the Demo →
-            </Link>
-          </div>
-        </div>
-      </section>
 
       <footer className="descent-footer">
         <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
