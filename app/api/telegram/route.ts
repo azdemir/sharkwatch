@@ -4,12 +4,17 @@ import { getTelegramChannel } from "@/lib/telegram-server";
 export async function GET() {
   const channel = getTelegramChannel();
   if (!channel) {
-    return NextResponse.json({ configured: false, subscribers: 0, hint: "Set TELEGRAM_BOT_TOKEN in .env and restart the dev server." });
+    return NextResponse.json({ configured: false, enabled: false, subscribers: 0, hint: "Set TELEGRAM_BOT_TOKEN in .env and restart the dev server." });
   }
   let username: string | null = null;
   try { username = await channel.botUsername(); } catch { username = null; }
   return NextResponse.json({
     configured: true,
+    // Demo UI (StatusPanel TelegramLine) reads these names, not `configured`/
+    // `botUsername` — without them it treated Telegram as off even when configured.
+    enabled: true,
+    username: username,
+    link: username ? `https://t.me/${username}` : undefined,
     botUsername: username,
     subscribers: channel.subscribers.length,
     subscriberNames: channel.subscribers.map((s) => s.name),

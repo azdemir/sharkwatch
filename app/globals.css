@@ -178,7 +178,7 @@ button { font: inherit; cursor: pointer; }
 .mapbox .pinlabel { position: absolute; transform: translate(-50%, 0); background: rgba(0,0,0,.7); padding: 2px 8px; border-radius: 8px; font-size: 11px; white-space: nowrap; }
 
 /* ---------- DESCENT MVP (develop branch) ---------- */
-.descent-page { background: transparent; color: #eef4f3; overflow-x: hidden; }
+.descent-page { background: #000812; color: #eef4f3; overflow-x: hidden; }
 .descent-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
 .descent-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 20px 32px; color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.6); }
 .descent-nav b { letter-spacing: .28em; font-size: 13px; }
@@ -195,7 +195,12 @@ button { font: inherit; cursor: pointer; }
 @keyframes descent-rise { to { transform: translateY(-110vh) translateX(20px); } }
 .descent-stage { position: relative; min-height: 100svh; display: flex; align-items: flex-end; overflow: hidden; background: transparent; }
 .descent-stage:not(#surface)::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 300px; background: linear-gradient(180deg, transparent 0%, rgba(1,8,14,.35) 40%, rgba(1,8,14,.75) 75%, rgba(1,8,14,.98) 100%); z-index: 1; pointer-events: none; }
-.descent-stage:not(#surface)::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 240px; background: linear-gradient(180deg, rgba(1,8,14,.98) 0%, rgba(1,8,14,.55) 40%, transparent 100%); z-index: 1; pointer-events: none; }
+.descent-stage:not(#surface)::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 300px; background: linear-gradient(180deg, rgba(1,8,14,.98) 0%, rgba(1,8,14,.55) 40%, transparent 100%); z-index: 1; pointer-events: none; }
+/* Hero (#surface) was the only section with no bottom fade, so the beach video
+   ended in a hard line before the next section's dark top fade. Fade the hero
+   out to the same near-black, so beach -> dark -> underwater reads as one
+   smooth gradient instead of a cut. */
+#surface.descent-stage::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 320px; background: linear-gradient(180deg, transparent 0%, rgba(1,8,14,.35) 40%, rgba(1,8,14,.75) 75%, rgba(1,8,14,.98) 100%); z-index: 1; pointer-events: none; }
 .descent-stage-img, .descent-hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .descent-stage:not(:first-of-type) .descent-stage-img { animation: descent-kenburns 26s ease-in-out infinite alternate; }
 @keyframes descent-kenburns { from { transform: scale(1.06); } to { transform: scale(1.14) translateY(-12px); } }
@@ -236,7 +241,7 @@ button { font: inherit; cursor: pointer; }
 .descent-seq b { display: block; font-family: Palatino, Georgia, serif; font-weight: 400; font-size: 20px; margin-top: 6px; }
 .descent-btn { border: 1px solid #fff; background: transparent; color: #fff; padding: 16px 26px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; font-weight: 750; margin-top: 28px; }
 .descent-btn.solid { background: #ffb454; border-color: #ffb454; color: #000; }
-.descent-return { background: transparent; padding: 120px 32px; position: relative; }
+.descent-return { background: #000812; padding: 120px 32px; position: relative; }
 .descent-return::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 150px; background: linear-gradient(180deg, rgba(1,8,14,.7), transparent); z-index: 0; pointer-events: none; }
 .descent-return h2 { font-size: clamp(26px, 4vw, 56px); line-height: 1.05; letter-spacing: -.02em; margin: 24px 0 18px; }
 .descent-return h2 em { font-family: Palatino, Georgia, serif; font-style: italic; font-weight: 400; color: #90e0c8; }
@@ -251,7 +256,7 @@ button { font: inherit; cursor: pointer; }
 .descent-step h4 { margin: 0 0 8px; font-size: 18px; }
 .descent-step p { margin: 0; color: #c4d6db; line-height: 1.7; }
 .descent-step code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; background: rgba(255,255,255,.08); padding: 2px 7px; }
-.descent-footer { padding: 60px 32px 40px; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; color: #9db4bc; border-top: 1px solid rgba(238,244,243,.18); }
+.descent-footer { padding: 60px 32px 40px; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; color: #9db4bc; border-top: 1px solid rgba(238,244,243,.18); background: #000812; }
 .descent-rv { opacity: 1; }
 @media (scripting: enabled) { .descent-rv { opacity: 0; transform: translateY(34px); transition: opacity 1.1s cubic-bezier(.16,1,.3,1), transform 1.1s cubic-bezier(.16,1,.3,1); } .descent-rv.in { opacity: 1; transform: none; } }
 .descent-model { background: transparent; padding: 110px 32px; position: relative; border-top: 1px solid rgba(238,244,243,.08); }
@@ -283,7 +288,7 @@ button { font: inherit; cursor: pointer; }
 .demo-start pre { background: #00131f; border: 1px solid rgba(255,255,255,.15); padding: 20px; overflow-x: auto; line-height: 2; }
 .demo-consoles ul { line-height: 2.2; }
 .demo-consoles a { color: #7ee7ff; }
-.descent-hero-model { margin-top: 16px; background: linear-gradient(180deg, rgba(1,8,14,.15) 0%, rgba(1,8,14,.35) 60%, rgba(1,8,14,.5) 100%); border: 1px solid rgba(238,244,243,.08); padding: 24px 28px; max-width: 760px; border-radius: 8px; backdrop-filter: blur(4px); }
+.descent-hero-model { margin-top: 16px; background: transparent; border: none; padding: 24px 28px; max-width: 760px; border-radius: 0; backdrop-filter: none; }
 .descent-hero-model h2, .descent-hero-model p, .descent-hero-model .descent-mono { text-shadow: 0 2px 12px rgba(0,0,0,.9), 0 1px 4px rgba(0,0,0,.7); }
 .descent-hero-model p { color: #e8f0f0; }
 .descent-hero-model .descent-mono { color: #90e0c8; }
