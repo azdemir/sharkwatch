@@ -180,17 +180,7 @@ export default function Home() {
   return (
     <div className="descent-page">
       <nav className="descent-nav">
-        <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-            <path d="M4 28 C6 24, 8 18, 12 10 C14 6, 16 4, 18 6 C20 8, 22 14, 24 20 C26 24, 28 27, 28 28 Z" fill="#7fe3c8" opacity="0.9" />
-            <path d="M4 28 C6 24, 8 18, 12 10 C14 6, 16 4, 18 6 C20 8, 22 14, 24 20 C26 24, 28 27, 28 28" stroke="#ffb454" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M12 28 C14 22, 16 16, 18 12 C19 10, 20 12, 21 16 C22 20, 23 24, 24 28 Z" fill="#01080e" opacity="0.25" />
-          </svg>
-          <span style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-            <b style={{ letterSpacing: ".22em", fontSize: 15, color: "#fff", lineHeight: 1 }}>SHARKWATCH</b>
-            <span style={{ fontSize: 9, letterSpacing: ".12em", color: "#9db4bc", textTransform: "uppercase", marginTop: 2, fontWeight: 400 }}>Drone Shark Detection</span>
-          </span>
-        </span>
+        <img src="/sharkwatch-logo.svg" alt="SharkWatch" width="200" style={{ flexShrink: 0, display: "block", height: "auto" }} />
         <span className="descent-nav-links">
           <a href="http://localhost:5173/" target="_blank" rel="noreferrer">Demo →</a>
           <Link href="/detect">Detect</Link>
@@ -276,9 +266,6 @@ export default function Home() {
 
       <section className="descent-return" id="return">
         <div className="descent-rv">
-          <div className="descent-mono" style={{ color: "#9db4bc" }}>
-            Back on shore · Light returns
-          </div>
           <h2>
             You came back up.
             <br />
@@ -312,16 +299,7 @@ export default function Home() {
 
       <footer className="descent-footer">
         <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-              <path d="M4 28 C6 24, 8 18, 12 10 C14 6, 16 4, 18 6 C20 8, 22 14, 24 20 C26 24, 28 27, 28 28 Z" fill="#7fe3c8" opacity="0.9" />
-              <path d="M4 28 C6 24, 8 18, 12 10 C14 6, 16 4, 18 6 C20 8, 22 14, 24 20 C26 24, 28 27, 28 28" stroke="#ffb454" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-              <b style={{ letterSpacing: ".22em", fontSize: 13, color: "#fff", lineHeight: 1 }}>SHARKWATCH</b>
-              <span style={{ fontSize: 8, letterSpacing: ".1em", color: "#9db4bc", textTransform: "uppercase", marginTop: 2, fontWeight: 400 }}>Drone Shark Detection</span>
-            </span>
-          </span>
+          <img src="/sharkwatch-logo.svg" alt="SharkWatch" width="180" style={{ flexShrink: 0, display: "block", height: "auto" }} />
 
         </div>
         <div style={{ display: "flex", gap: 40, flexWrap: "wrap" }}>

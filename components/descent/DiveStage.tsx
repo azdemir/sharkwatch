@@ -1,4 +1,5 @@
-import type { ReactNode, RefObject } from "react";
+import type { MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
+import { useRef } from "react";
 import type { DiveStage as DiveStageData } from "@/lib/descent";
 
 type DiveStageProps = {
@@ -22,8 +23,25 @@ export default function DiveStage({
   onToggleVideo,
   overlay,
 }: DiveStageProps) {
+  const tiltRef = useRef<HTMLDivElement>(null);
+  const handleTilt = (e: ReactMouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    if (tiltRef.current) {
+      tiltRef.current.style.transform = `rotateX(${(-y * 6).toFixed(2)}deg) rotateY(${(x * 8).toFixed(2)}deg) translate3d(${(x * 14).toFixed(1)}px, ${(y * 10).toFixed(1)}px, 0)`;
+    }
+  };
+  const resetTilt = () => {
+    if (tiltRef.current) tiltRef.current.style.transform = "";
+  };
   return (
-    <section className="descent-stage" id={stage.id}>
+    <section
+      className="descent-stage"
+      id={stage.id}
+      onMouseMove={isHero ? undefined : handleTilt}
+      onMouseLeave={isHero ? undefined : resetTilt}
+    >
       {isHero && video ? (
         <video
           ref={videoRef}
@@ -38,11 +56,14 @@ export default function DiveStage({
           <source src={video} type="video/mp4" />
         </video>
       ) : (
-        <img
-          className="descent-stage-img"
-          src={stage.image}
-          alt={stage.imageAlt}
-        />
+        <div ref={tiltRef} className="shark-3d-tilt">
+          <img
+            className="descent-stage-img shark-3d"
+            src={stage.image}
+            alt={stage.imageAlt}
+          />
+          <div className="shark-3d-shine" aria-hidden="true" />
+        </div>
       )}
       {!isHero && <div className={`descent-dark ${stage.darkClass}`} />}
       <div className="descent-inner">

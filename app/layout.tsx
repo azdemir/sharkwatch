@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SHARKWATCH — Drone Shark Detection & Authority Alerts",
+  title: "SharkWatch",
   description:
     "AI drone footage detects sharks in real time and reports sightings to authorities. Cinematic, full-screen, no clutter.",
 };

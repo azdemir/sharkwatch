@@ -199,6 +199,17 @@ button { font: inherit; cursor: pointer; }
 .descent-stage-img, .descent-hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .descent-stage:not(:first-of-type) .descent-stage-img { animation: descent-kenburns 26s ease-in-out infinite alternate; }
 @keyframes descent-kenburns { from { transform: scale(1.06); } to { transform: scale(1.14) translateY(-12px); } }
+/* 3D shark images: mouse tilt on the section, swimming motion on the photo itself */
+.descent-stage { perspective: 1400px; }
+.shark-3d-tilt { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .35s ease-out; will-change: transform; }
+.descent-stage:not(:first-of-type) .descent-stage-img.shark-3d { animation: shark-swim 18s ease-in-out infinite alternate; }
+@keyframes shark-swim { from { transform: scale(1.06) translateX(-1%) rotate(-.6deg); } to { transform: scale(1.14) translateX(1.5%) translateY(-12px) rotate(.8deg); } }
+#d10 .shark-3d { animation-duration: 16s; }
+#d30 .shark-3d { animation-duration: 22s; animation-direction: alternate-reverse; }
+#d80 .shark-3d { animation-duration: 26s; }
+.shark-3d-shine { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.12) 48%, transparent 62%); opacity: 0; transition: opacity .35s ease; pointer-events: none; }
+.shark-3d-tilt:hover .shark-3d-shine { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .descent-stage:not(:first-of-type) .descent-stage-img.shark-3d { animation: none; } .shark-3d-tilt { transition: none; } }
 .descent-dark { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(1,8,14,.05), transparent 25%, rgba(1,8,14,.2) 50%, rgba(1,8,14,.5) 75%, rgba(1,8,14,.8) 100%); }
 .descent-dark.d10 { background: linear-gradient(180deg, rgba(1,8,14,.15), transparent 25%, rgba(1,8,14,.3) 50%, rgba(1,8,14,.6) 75%, rgba(1,8,14,.85) 100%); }
 .descent-dark.d30 { background: linear-gradient(180deg, rgba(1,8,14,.25), transparent 20%, rgba(1,8,14,.4) 45%, rgba(1,8,14,.7) 75%, rgba(1,8,14,.9) 100%); }
@@ -278,8 +289,11 @@ button { font: inherit; cursor: pointer; }
 #surface .descent-inner { padding: 104px 32px 32px; }
 #surface .descent-hero-model { margin: 16px 0 0; }
 /* Smooth section transitions: longer top fades, no hard border line */
-.descent-abyss::before, .descent-return::before, .descent-model::before { height: 240px; background: linear-gradient(180deg, rgba(1,8,14,.98) 0%, rgba(1,8,14,.55) 40%, transparent 100%); }
+.descent-abyss::before, .descent-return::before, .descent-model::before { height: 300px; background: linear-gradient(180deg, rgba(1,8,14,.98) 0%, rgba(1,8,14,.55) 40%, transparent 100%); }
 .descent-model { border-top: none; }
+/* Same gradient logic for Abyss/Return/Model: fade the bottom of each section to near-black, so the next section starts black-on-black instead of a hard colour cut */
+.descent-abyss::after, .descent-return::after, .descent-model::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 300px; background: linear-gradient(180deg, transparent 0%, rgba(1,8,14,.35) 40%, rgba(1,8,14,.75) 75%, rgba(1,8,14,.98) 100%); z-index: 0; pointer-events: none; }
+.descent-abyss > div, .descent-return > div, .descent-model > div { position: relative; z-index: 1; }
 .descent-hero-model p { margin: 0 0 10px; color: #e6f0f2; }
 .descent-hero-model a { color: #fff; }
 .descent-hero-model-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
