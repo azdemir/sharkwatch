@@ -217,6 +217,10 @@ button { font: inherit; cursor: pointer; }
    out to the same near-black, so beach -> dark -> underwater reads as one
    smooth gradient instead of a cut. */
 #surface.descent-stage::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 320px; background: linear-gradient(180deg, transparent 0%, rgba(1,8,14,.35) 40%, rgba(1,8,14,.75) 75%, rgba(1,8,14,.98) 100%); z-index: 1; pointer-events: none; }
+/* Hero top fade, matching the other stages: the video now gradients into
+ * the nav at the top as well as into How It Works at the bottom, so no
+ * homepage image ends in a hard edge. */
+#surface.descent-stage::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 220px; background: linear-gradient(180deg, rgba(1,8,14,.92) 0%, rgba(1,8,14,.45) 45%, transparent 100%); z-index: 1; pointer-events: none; }
 .descent-stage-img, .descent-hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 /* Hero SAM-style tracker: dashed amber outline + cyan corner brackets, the
  * demo's overlay language, following the hero video's 10 s loop. Path measured
@@ -343,6 +347,85 @@ button { font: inherit; cursor: pointer; }
 .descent-hero-model a { color: #fff; }
 .descent-hero-model-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
 .descent-hero-model-actions .descent-btn { margin-top: 0; padding: 12px 18px; }
+/* How It Works page, in the Descent dark style. The visual is pure CSS:
+ * a scan line sweeps the shark photo and a dashed SAM-style box pulses
+ * as it passes — an illustration of the process, not a live detection. */
+.how-main { max-width: 1000px; margin: 0 auto; padding: 140px 32px 80px; }
+/* When How It Works lives on the homepage (second section, not a standalone
+ * page), it needs section padding, not a full page's top padding, and room
+ * for the fixed nav when an anchor link jumps to it. */
+.how-section { background: #000812; scroll-margin-top: 80px; }
+.how-section .how-main { padding: 80px 32px; }
+@media (max-width: 700px) { .how-section .how-main { padding: 60px 20px; } }
+/* Cinematic How It Works: full-bleed photo stages, text bottom-left like
+ * the screenshot — FIRST / THEN / FINALLY, big white word, italic teal
+ * second line, body below. A dark bottom gradient keeps text readable
+ * over the photo without a panel. */
+/* Full-screen anchor landing: the nav is fixed and overlays the image, so
+ * the How section must land with NO top offset — a scroll-margin here
+ * leaves a strip of the hero visible above it, and a 92vh stage leaves
+ * the next stage peeking below. 100svh + 0 margin = exactly one full
+ * screen per stage when How It Works is clicked. */
+.how-cine { background: #000812; scroll-margin-top: 0; }
+.how-cine-stage { position: relative; min-height: 100svh; overflow: hidden; }
+.how-cine-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.how-cine-stage::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,8,18,.92) 0%, rgba(0,8,18,.45) 12%, rgba(0,8,18,0) 26%, rgba(0,8,18,0) 68%, rgba(0,8,18,.35) 85%, rgba(0,8,18,.88) 100%); }
+.how-cine-text { position: absolute; z-index: 1; left: 32px; bottom: 48px; max-width: 560px; }
+.how-cine-text h2 { font-size: clamp(56px, 9vw, 120px); line-height: .92; letter-spacing: -.03em; font-weight: 850; text-transform: uppercase; margin: 0 0 20px; color: #fff; }
+.how-cine-text h2 em { font-family: Palatino, Georgia, serif; font-style: italic; font-weight: 400; text-transform: none; color: #a8e6cf; }
+.how-cine-text p { font-size: 17px; line-height: 1.6; color: #eef4f6; margin: 0 0 14px; text-shadow: 0 1px 12px rgba(0,0,0,.6); }
+.how-cine-text .how-cine-detail { font-size: 14px; color: #c4d6db; }
+.how-cine-close { max-width: 1000px; margin: 0 auto; padding: 72px 32px 80px; }
+.how-cine-close .how-timeline-row { margin-bottom: 56px; }
+.how-cine-close .how-mode-grid { margin-bottom: 0; }
+@media (max-width: 700px) {
+  .how-cine-stage { min-height: 100svh; }
+  .how-cine-text { left: 20px; right: 20px; bottom: 32px; }
+  .how-cine-text h2 { font-size: 52px; }
+  .how-cine-text p { font-size: 15px; }
+  .how-cine-close { padding: 56px 20px 60px; }
+}
+.how-main h1 { font-size: clamp(44px, 7vw, 96px); line-height: .95; letter-spacing: -.04em; font-weight: 850; text-transform: uppercase; margin: 0 0 20px; }
+.how-main h1 em { font-family: Palatino, Georgia, serif; font-style: italic; font-weight: 400; text-transform: none; color: #90e0c8; }
+.how-intro { font-size: 18px; line-height: 1.65; color: #c4d6db; max-width: 62ch; margin: 0 0 40px; }
+.how-visual { position: relative; overflow: hidden; border: 1px solid #2a3f54; aspect-ratio: 16 / 9; max-height: 520px; }
+.how-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.how-scan { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: #7ee7ff; box-shadow: 0 0 18px #7ee7ff; animation: how-scan 5s ease-in-out infinite; }
+@keyframes how-scan { 0%, 100% { top: 8%; } 50% { top: 88%; } }
+.how-box { position: absolute; left: 28%; top: 30%; width: 34%; aspect-ratio: 1.8; border: 2px dashed #ffb454; animation: how-box-pulse 5s ease-in-out infinite; }
+.how-box span { position: absolute; bottom: -27px; right: 0; white-space: nowrap; background: #04090f; color: #7ee7ff; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; letter-spacing: .12em; padding: 4px 8px; }
+@keyframes how-box-pulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+.how-caption { font-size: 13px; color: #9db4bc; margin: 12px 0 56px; }
+.how-steps { display: flex; flex-direction: column; gap: 56px; }
+.how-step { display: grid; grid-template-columns: 64px 1fr; gap: 20px; border-top: 1px solid rgba(238,244,243,.18); padding-top: 32px; }
+.how-num { font-family: Palatino, Georgia, serif; font-size: 40px; color: #90e0c8; line-height: 1; }
+.how-step h2 { font-size: 30px; margin: 0 0 12px; letter-spacing: -.02em; }
+.how-step p { font-size: 16px; line-height: 1.7; color: #c4d6db; margin: 0 0 20px; max-width: 62ch; }
+.how-step img { width: 100%; height: 240px; object-fit: cover; display: block; border: 1px solid #2a3f54; }
+.how-timeline { margin-top: 72px; border-top: 1px solid rgba(238,244,243,.18); padding-top: 32px; }
+.how-timeline h2, .how-modes h2 { font-size: 30px; margin: 0 0 24px; letter-spacing: -.02em; }
+.how-timeline-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.how-timeline-row b { display: block; font-family: Palatino, Georgia, serif; font-weight: 400; font-size: 28px; color: #90e0c8; }
+.how-timeline-row span { display: block; font-size: 13px; color: #c4d6db; margin-top: 4px; }
+.how-timeline p, .how-mode-grid p { font-size: 16px; line-height: 1.7; color: #c4d6db; margin: 0; max-width: 62ch; }
+.how-modes { margin-top: 72px; border-top: 1px solid rgba(238,244,243,.18); padding-top: 32px; }
+.how-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.how-mode-grid > div { border: 1px solid #2a3f54; background: #0a121c; padding: 24px; }
+.how-mode-grid h3 { margin: 0 0 10px; font-size: 18px; }
+.how-cta { margin-top: 56px; display: flex; gap: 16px; flex-wrap: wrap; }
+.how-cta .descent-btn { margin-top: 0; }
+@media (max-width: 700px) {
+  .how-main { padding: 120px 20px 60px; }
+  .how-main h1 { font-size: 36px; }
+  .how-intro { font-size: 16px; }
+  .how-step { grid-template-columns: 40px 1fr; }
+  .how-num { font-size: 28px; }
+  .how-step img { height: 180px; }
+  .how-timeline-row { grid-template-columns: 1fr 1fr; }
+  .how-mode-grid { grid-template-columns: 1fr; }
+  .how-box span { font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .how-scan, .how-box { animation: none; } .how-scan { top: 50%; } }
 /* Mobile: the site had almost no small-screen rules — nav, hero heading,
  * paddings and the tracker label were all desktop-sized, so a phone got a
  * cramped nav, a 50px hero heading and 32px side gutters. These keep the

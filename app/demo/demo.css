@@ -191,6 +191,24 @@ body {
 .controls .primary.stop { background: transparent; color: var(--color-ink); border: 1px solid var(--color-rule-strong); }
 .controls .primary.stop:hover { background: var(--color-paper-2); }
 
+/* Upload button in the demo nav bar, far right: the same amber as the
+ * Start patrol primary, sized to the header (40px, not the 48px strip). */
+.upload-btn {
+  height: 40px;
+  box-sizing: border-box;
+  padding: 0 20px;
+  background: #ffb454;
+  color: #000;
+  border: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.upload-btn:hover { background: #ffc67f; }
+
 /* Alert actions, exactly the Run Again primary button's shape — plain CSS, not
  * Tailwind utilities, so they cannot drift from it again: same 48px height,
  * same 28px side padding, same 13px bold uppercase text, centred by line-height

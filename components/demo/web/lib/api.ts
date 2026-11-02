@@ -18,11 +18,20 @@ export const api = {
   health: () => fetch('/api/health').then((r) => json<HealthInfo>(r)),
   clips: () => fetch('/api/clips').then((r) => json<ClipInfo[]>(r)),
   recordings: () => fetch('/api/recordings').then((r) => json<RecordingInfo[]>(r)),
-  start: (body: { mode: 'live' | 'replay'; clipId?: string; recording?: string; passcode?: string; speed?: number }) =>
+  start: (body: { mode: 'live' | 'replay'; clipId?: string; uploadId?: string; recording?: string; passcode?: string; speed?: number }) =>
     fetch('/api/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) =>
       json<StartedSession>(r),
     ),
   stop: (sessionId: string) => fetch(`/api/sessions/${sessionId}/stop`, { method: 'POST' }).then((r) => json<{ stopped: boolean }>(r)),
+  uploadFile: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return fetch('/api/uploads', { method: 'POST', body: form }).then((r) => json<{ uploadId: string; clip: ClipInfo; liveAvailable: boolean }>(r));
+  },
+  uploadUrl: (videoUrl: string) =>
+    fetch('/api/uploads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ videoUrl }) }).then((r) =>
+      json<{ uploadId: string; clip: ClipInfo; liveAvailable: boolean }>(r),
+    ),
   eventsUrl: (sessionId: string) => `/api/sessions/${sessionId}/events`,
   alertsStreamUrl: () => '/api/alerts/stream',
   acknowledge: (alertId: string, role: RecipientRole, by: string) =>

@@ -1,13 +1,17 @@
-// Integrated demo sessions (Replay only, one server).
+// Integrated demo sessions (Replay + Live, one server).
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { getTelegramChannel } from '@/lib/telegram-server';
 import { CONFIRM_FRAMES, type SessionEvent, type TrackSummary } from '../shared/events.ts';
 import type { ClipManifest } from '../shared/manifest.ts';
-import { templateDraft } from './alerts/agent.ts';
+import { draftWithAgent, templateDraft } from './alerts/agent.ts';
 import { alertHub } from './alerts/hub.ts';
 import { AlertService, type AlertChannel } from './alerts/service.ts';
-import { EventBus } from './events/bus.ts';
+import { config, liveAvailable } from './config.ts';
+import { EventBus, recordTo } from './events/bus.ts';
+import { LiveSamSource } from './pipeline/sam-source.ts';
+import { runSession } from './pipeline/session.ts';
+import { SparkVerifier } from './pipeline/verifier.ts';
 export interface SessionHandle { id: string; clipId: string; mode: 'live' | 'replay'; bus: EventBus; dir: string; abort: AbortController; alerts: AlertService; }
 export const DATA_DIR = join(process.cwd(), 'data');
 export const SESSIONS_DIR = join(DATA_DIR, 'sessions');
@@ -58,9 +62,19 @@ function demoTelegramChannel(): AlertChannel | undefined {
   }
   return { broadcast: async (alert) => (await channel.broadcast(alert)).size };
 }
-function alertServiceFor(bus: EventBus, sessionId: string, clipId: string, dir: string): AlertService {
+// Paid Muse Spark alert-drafting calls in this server process, capped by AGENT_CALL_BUDGET (vite parity).
+let agentCalls = 0;
+function alertServiceFor(bus: EventBus, sessionId: string, clipId: string, dir: string, opts: { live?: boolean; locationName?: string } = {}): AlertService {
   const manifest = loadManifest(clipId);
-  const service = new AlertService({ bus, sessionId, clipId, locationName: manifest?.scene?.beachName ?? clipId, sessionDir: dir, draft: async (r) => templateDraft(r, 'Templates used (integrated demo, Replay only)'), telegram: demoTelegramChannel(), escalateAfterS: 45, onChange: (alert) => alertHub.publish(alert) });
+  // Paid Muse Spark drafting runs ONLY for Live sessions. Replay stays free and
+  // template-only, exactly as before — a replay must never spend API calls.
+  const service = new AlertService({ bus, sessionId, clipId, locationName: opts.locationName ?? manifest?.scene?.beachName ?? clipId, sessionDir: dir, draft: async (r) => {
+    if (!opts.live) return templateDraft(r, 'Templates used (integrated demo, Replay only)');
+    if (!liveAvailable()) return templateDraft(r, 'No Meta key: templates used');
+    if (agentCalls >= config.agentCallBudget) return templateDraft(r, `Agent call budget (${config.agentCallBudget}) reached: templates used`);
+    agentCalls++;
+    return draftWithAgent(r);
+  }, telegram: demoTelegramChannel(), escalateAfterS: 45, onChange: (alert) => alertHub.publish(alert) });
   alertHub.register(sessionId, service);
   return service;
 }
@@ -152,4 +166,43 @@ export function startReplaySession(recordingId: string, speed = 1): SessionHandl
     }
   })();
   return handle;
+}
+
+// Live sessions below.
+// Live SAM 3.1 + Muse Spark over an already-built manifest.
+// manifestDir holds playback.mp4: data/clips/<id> for committed clips,
+// data/uploads/<id> for uploaded footage. Uploads analyse as fast as the
+// API allows (realtime false); committed clips use vite's realtime true.
+// Throws LiveUnavailableError with no key or a wrong passcode; an API error
+// ends the session with reason error and a warning, never invented boxes.
+export function startLiveSession(manifest: ClipManifest, passcode?: string, opts: { manifestDir?: string; realtime?: boolean; locationName?: string } = {}): SessionHandle {
+  if (!liveAvailable()) throw new LiveUnavailableError('Live mode needs a Meta key. Add MODEL_API_KEY (or META_KEY) to .env next to package.json, then restart the dev server.');
+  if (config.livePasscode && passcode !== config.livePasscode) throw new LiveUnavailableError('wrong or missing passcode');
+  const id = newId(manifest.id, 'live');
+  const dir = join(SESSIONS_DIR, id);
+  const bus = new EventBus(id);
+  recordTo(bus, join(dir, 'events.jsonl'));
+  const handle: SessionHandle = { id, clipId: manifest.id, mode: 'live', bus, dir, abort: new AbortController(), alerts: alertServiceFor(bus, id, manifest.id, dir, { live: true, locationName: opts.locationName }) };
+  sessions.set(id, handle);
+  runSession({
+    manifest,
+    bus,
+    sam: new LiveSamSource(join(dir, 'raw')),
+    verifier: new SparkVerifier(),
+    sessionDir: dir,
+    realtime: opts.realtime ?? true,
+    prompts: 'live',
+    signal: handle.abort.signal,
+    dir: opts.manifestDir,
+  }).catch((error: Error) => {
+    if (!bus.ended) bus.emit({ type: 'session.ended', reason: 'error', message: error.message, costUsd: 0 });
+  });
+  return handle;
+}
+
+// Live session over a committed clip (data/clips/<id>/manifest.json).
+export function startLiveClipSession(clipId: string, passcode?: string): SessionHandle {
+  const manifest = loadManifest(clipId);
+  if (!manifest) throw new Error(`unknown clip ${clipId}`);
+  return startLiveSession(manifest, passcode);
 }
