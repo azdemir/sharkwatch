@@ -68,7 +68,7 @@ export default function DiveStage({
           <div className="shark-3d-shine" aria-hidden="true" />
         </div>
       )}
-      {isHero && tracker && <HeroTracker paused={videoPaused} />}
+      {isHero && tracker && <HeroTracker videoRef={videoRef} />}
       {!isHero && <div className={`descent-dark ${stage.darkClass}`} />}
       <div className="descent-inner">
         {(stage.heading || stage.headingEm) && (

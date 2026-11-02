@@ -222,28 +222,16 @@ button { font: inherit; cursor: pointer; }
  * homepage image ends in a hard edge. */
 #surface.descent-stage::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 220px; background: linear-gradient(180deg, rgba(1,8,14,.92) 0%, rgba(1,8,14,.45) 45%, transparent 100%); z-index: 1; pointer-events: none; }
 .descent-stage-img, .descent-hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-/* Hero SAM-style tracker: dashed amber outline + cyan corner brackets, the
- * demo's overlay language, following the hero video's 10 s loop. Path measured
- * from the video frames (small, left, at 0 s; drifting right and growing as
- * the camera pushes in; holding to 99% then jumping back at the loop, exactly
- * like the video). It pauses with the video and is labelled SIMULATED. */
-.hero-tracker { position: absolute; z-index: 2; pointer-events: none; aspect-ratio: 1.8; animation: hero-track 10s linear infinite; }
-.hero-tracker-dash { position: absolute; inset: 0; border: 2px dashed #ffb454; opacity: .9; }
-.hero-tracker-corner { position: absolute; width: 22px; height: 22px; border: 3px solid #7ee7ff; }
-.hero-tracker-corner.tl { top: -3px; left: -3px; border-right: 0; border-bottom: 0; }
-.hero-tracker-corner.tr { top: -3px; right: -3px; border-left: 0; border-bottom: 0; }
-.hero-tracker-corner.bl { bottom: -3px; left: -3px; border-right: 0; border-top: 0; }
-.hero-tracker-corner.br { bottom: -3px; right: -3px; border-left: 0; border-top: 0; }
-.hero-tracker-label { position: absolute; bottom: -27px; right: 0; white-space: nowrap; background: #04090f; color: #7ee7ff; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; letter-spacing: .12em; padding: 4px 8px; }
-@keyframes hero-track {
-  0%, 100% { left: 26%; top: 34%; width: 17%; }
-  10% { left: 27%; top: 34%; width: 18%; }
-  30% { left: 28%; top: 33%; width: 20%; }
-  50% { left: 23%; top: 34%; width: 30%; }
-  70% { left: 24%; top: 30%; width: 38%; }
-  85%, 99% { left: 24%; top: 26%; width: 42%; }
-}
-@media (prefers-reduced-motion: reduce) { .hero-tracker { animation: none; left: 26%; top: 34%; width: 17%; } }
+/* Hero tracker, model-driven: the dotted outline is NOT a CSS animation.
+ * lib/hero-track.ts holds per-frame shark contours from a local U2Net
+ * segmentation model run offline over the hero video (no API, no runtime
+ * model call). HeroTracker.tsx reads video.currentTime, interpolates
+ * between model frames, and maps the contour through the video's
+ * object-fit: cover crop, so it lands on the shark at any window shape.
+ * It pauses with the video and is labelled SIMULATED. */
+.hero-tracker { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.hero-tracker-outline { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 1px 4px rgba(0,0,0,.6)); }
+.hero-tracker-label { position: absolute; white-space: nowrap; background: #04090f; color: #7ee7ff; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; letter-spacing: .12em; padding: 4px 8px; }
 .descent-stage:not(:first-of-type) .descent-stage-img { animation: descent-kenburns 26s ease-in-out infinite alternate; }
 @keyframes descent-kenburns { from { transform: scale(1.06); } to { transform: scale(1.14) translateY(-12px); } }
 /* 3D shark images: mouse tilt on the section, swimming motion on the photo itself */
@@ -431,6 +419,67 @@ button { font: inherit; cursor: pointer; }
  * cramped nav, a 50px hero heading and 32px side gutters. These keep the
  * same layout, just sized for a phone. The !important on the hero h2 is
  * needed because its size is set inline in app/page.tsx. */
+/* Why SharkWatch — LIGHT page (Aziz, 2026-11-02: the dark version was rejected).
+ * Body is light; nav and footer stay dark so the white logo/links read.
+ * Grid uses auto-fit/minmax, so it adjusts instead of cramming 3 columns
+ * on a narrow screen. Animations: fade-up on load, slow zoom on photos,
+ * lift on card hover. Reduced-motion turns them off. */
+.why-light { background: #f7f4ee; color: #0b1a22; overflow-x: hidden; }
+.why-light .why-nav { background: #000812; box-shadow: 0 2px 20px rgba(0,0,0,.35); }
+.why-main { max-width: 1000px; margin: 0 auto; padding: 130px 32px 80px; }
+.why-main h1 { font-size: clamp(44px, 7vw, 96px); line-height: .95; letter-spacing: -.04em; font-weight: 850; text-transform: uppercase; margin: 0 0 20px; color: #0b1a22; }
+.why-main h1 em { font-family: Palatino, Georgia, serif; font-style: italic; font-weight: 400; text-transform: none; color: #0e7a6b; }
+.why-main h2 { font-size: clamp(26px, 4vw, 40px); letter-spacing: -.02em; margin: 56px 0 16px; color: #0b1a22; }
+.why-main p { font-size: 16px; line-height: 1.7; color: #3d4f57; margin: 0 0 16px; max-width: 72ch; }
+.why-intro { font-size: 18px !important; line-height: 1.65; color: #3d4f57; max-width: 62ch; margin: 0 0 40px !important; }
+.why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin: 24px 0 32px; }
+.why-card { background: #fff; border: 1px solid #dbe3e6; padding: 24px; transition: transform .3s ease, box-shadow .3s ease; }
+.why-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(11,26,34,.12); }
+.why-card p { margin: 0; }
+.why-label { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #0e7a6b; margin-bottom: 10px; }
+.why-big { font-size: clamp(26px, 3.5vw, 34px) !important; line-height: 1.15; color: #0b1a22 !important; font-weight: 800; margin: 0 0 10px !important; max-width: none !important; }
+.why-big span { font-size: 14px; color: #52616b; font-weight: 400; }
+.why-hero, .why-photo { margin: 32px 0; overflow: hidden; }
+.why-hero img, .why-photo img { width: 100%; height: 100%; object-fit: cover; display: block; animation: why-zoom 18s ease-in-out infinite alternate; }
+.why-hero img { aspect-ratio: 16 / 9; max-height: 520px; }
+.why-photo img { aspect-ratio: 16 / 10; max-height: 420px; }
+@keyframes why-zoom { from { transform: scale(1); } to { transform: scale(1.06); } }
+.why-hero figcaption, .why-photo figcaption { font-size: 13px; color: #52616b; margin-top: 10px; }
+.why-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 32px 0; }
+.why-photos .why-photo { margin: 0; }
+/* Apple-style scroll reveal: sections start soft, low and slightly blurred,
+ * then ease into place with Apple's long cubic-bezier as they enter view.
+ * A small script (IntersectionObserver, in the page) adds .in — no scroll
+ * listener, no jump. Reduced-motion shows everything immediately. */
+.why-reveal { opacity: 0; transform: translateY(36px) scale(.985); filter: blur(6px); transition: opacity 1s cubic-bezier(.16,1,.3,1), transform 1s cubic-bezier(.16,1,.3,1), filter 1s cubic-bezier(.16,1,.3,1); will-change: opacity, transform, filter; }
+.why-reveal.in { opacity: 1; transform: none; filter: none; }
+.why-form { display: flex; flex-direction: column; gap: 18px; max-width: 560px; }
+.why-form label span { display: block; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #0e7a6b; margin-bottom: 8px; }
+.why-form input, .why-form textarea { width: 100%; box-sizing: border-box; background: #fff; border: 1px solid #dbe3e6; color: #0b1a22; font-size: 15px; padding: 12px 14px; font-family: inherit; }
+.why-form input:focus, .why-form textarea:focus { outline: none; border-color: #0e7a6b; }
+.why-sent { border: 1px solid #dbe3e6; background: #fff; padding: 24px; max-width: 560px; }
+.why-sent b { font-size: 18px; color: #0b1a22; }
+.why-sent p { font-size: 15px; line-height: 1.6; color: #3d4f57; margin: 8px 0 20px; }
+.why-faq { display: flex; flex-direction: column; gap: 16px; margin: 24px 0 32px; }
+.why-faq details { background: #fff; border: 1px solid #dbe3e6; padding: 20px 24px; }
+.why-faq summary { cursor: pointer; font-size: 18px; font-weight: 750; color: #0b1a22; line-height: 1.4; list-style: none; }
+.why-faq summary::-webkit-details-marker { display: none; }
+.why-faq summary::after { content: " +"; color: #0e7a6b; font-weight: 400; }
+.why-faq details[open] summary::after { content: " −"; }
+.why-faq details p { margin: 12px 0 0; }
+.why-note { border: 1px solid #e8c9a0; background: #fff8ec; padding: 16px 20px; color: #7a4a00 !important; max-width: 72ch; }
+.why-note a { color: #7a4a00; }
+.why-cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 40px; }
+.why-btn { border: 1px solid #0b1a22; background: transparent; color: #0b1a22; padding: 16px 26px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; font-weight: 750; text-decoration: none; display: inline-block; }
+.why-btn.solid { background: #ffb454; border-color: #ffb454; color: #000; }
+@media (max-width: 700px) {
+  .why-main { padding: 120px 20px 60px; }
+  .why-main h1 { font-size: 36px; }
+  .why-intro { font-size: 16px !important; }
+  .why-photos { grid-template-columns: 1fr; }
+  .why-hero img { aspect-ratio: 4 / 3; }
+}
+@media (prefers-reduced-motion: reduce) { .why-reveal { opacity: 1; transform: none; filter: none; transition: none; } .why-hero img, .why-photo img { animation: none; } .why-card { transition: none; } }
 @media (max-width: 700px) {
   .descent-nav { padding: 14px 16px; }
   .descent-nav img { width: 150px !important; }
@@ -443,7 +492,7 @@ button { font: inherit; cursor: pointer; }
   .descent-data { gap: 20px; }
   .descent-footer { padding: 40px 20px 32px; }
   .descent-btn { padding: 14px 20px; }
-  .hero-tracker-label { font-size: 10px; padding: 3px 6px; bottom: -24px; }
+  .hero-tracker-label { font-size: 10px; padding: 3px 6px; }
   .contact-main { padding: 120px 20px 60px; }
   .contact-main h1 { font-size: 36px; }
   .contact-intro { font-size: 16px; }

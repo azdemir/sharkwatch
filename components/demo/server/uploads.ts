@@ -14,7 +14,7 @@ import { join } from 'node:path';
 import type { ClipManifest } from '../shared/manifest.ts';
 import { DATA_DIR } from './sessions.ts';
 import { chunkFileName, chunkPlan } from './media/chunks.ts';
-import { FFPROBE, H264, ffmpeg, probeVideo } from './media/ffmpeg.ts';
+import { FFMPEG, FFPROBE, H264, ffmpeg, probeVideo } from './media/ffmpeg.ts';
 
 export const UPLOADS_DIR = join(DATA_DIR, 'uploads');
 export const MAX_UPLOAD_BYTES = 200 * 1024 * 1024;
@@ -120,7 +120,7 @@ function isPrivateIp(ip: string): boolean {
 const VIDEO_EXT = /\.(mp4|m4v|mov|webm|mkv)(\?.*)?$/i;
 
 /** Downloads a direct video link into data/uploads/<id>/download.bin; the
- * caller normalises it to playback.mp4 with normalisePlayback. */
+ * caller normalises it to playback.mp4 with normalisePlayback.
  * http/https only, at most 5 redirects, each hop re-checked; the host must
  * not resolve to a loopback/private address; the response must be a video
  * content-type (or, when the server sends none, a video file extension);
@@ -187,4 +187,72 @@ export async function downloadUploadVideo(id: string, videoUrl: string): Promise
     return { bytes };
   }
   throw new Error('that link redirected too many times');
+}
+
+/** A YouTube watch / short / share link, copied from YouTube. These never end
+ * in .mp4 and never point at a video file directly, so the direct-download
+ * path above correctly rejects them — this path downloads them instead. */
+export function isYoutubeUrl(videoUrl: string): boolean {
+  try {
+    const u = new URL(videoUrl);
+    return u.hostname === 'youtu.be' || u.hostname.endsWith('.youtube.com') || u.hostname === 'youtube.com';
+  } catch {
+    return false;
+  }
+}
+
+/** Downloads a YouTube link with yt-dlp into data/uploads/<id>/download.mp4.
+ * yt-dlp must be installed on the machine running the server (brew install
+ * yt-dlp, or pip install yt-dlp) — if it is missing, the error says so
+ * plainly instead of pretending the download worked. Only use this for
+ * videos you have the right to download and analyse. */
+export async function downloadYoutubeVideo(id: string, videoUrl: string): Promise<{ bytes: number }> {
+  const dir = uploadDir(id);
+  mkdirSync(dir, { recursive: true });
+  const dest = join(dir, 'download.mp4');
+  const ytDlp = process.env.YT_DLP_PATH ?? 'yt-dlp';
+  const ffmpegDir = FFMPEG && FFMPEG !== 'ffmpeg' ? FFMPEG.split('/').slice(0, -1).join('/') : undefined;
+  const args = [
+    '-f', 'bv*[height<=720][ext=mp4]+ba[ext=m4a]/bv*[height<=720]+ba/best[height<=720]',
+    '--merge-output-format', 'mp4',
+    '--remux-video', 'mp4',
+    ...(ffmpegDir ? ['--ffmpeg-location', ffmpegDir] : []),
+    '--no-playlist',
+    '-o', dest,
+    videoUrl,
+  ];
+  await new Promise<void>((resolve, reject) => {
+    const child = spawn(ytDlp, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    const err: Buffer[] = [];
+    let timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; child.kill('SIGKILL'); }, DOWNLOAD_TIMEOUT_MS);
+    child.stderr.on('data', (c: Buffer) => err.push(c));
+    child.on('error', (e: NodeJS.ErrnoException) => {
+      clearTimeout(timer);
+      if (e.code === 'ENOENT') reject(new Error('YouTube links need yt-dlp on this Mac — install it with: brew install yt-dlp (or pip install yt-dlp), then restart npm run dev'));
+      else reject(e);
+    });
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      if (timedOut) return reject(new Error('that YouTube download timed out'));
+      if (code !== 0) return reject(new Error(`yt-dlp failed: ${Buffer.concat(err).toString().trim().split('\n').slice(-3).join(' ') || `exit ${code}`}`));
+      resolve();
+    });
+  });
+  const fs = await import('node:fs');
+  // yt-dlp usually honours the .mp4 name above; if it fell back to another
+  // container, the file lands as download.<ext> instead — take that, and
+  // let normalisePlayback re-encode it to playback.mp4.
+  let downloaded = dest;
+  if (!fs.existsSync(downloaded)) {
+    const found = fs.readdirSync(dir).find((f) => f.startsWith('download.'));
+    if (!found) throw new Error('yt-dlp finished but left no video file');
+    downloaded = join(dir, found);
+    fs.renameSync(downloaded, dest);
+    downloaded = dest;
+  }
+  const stat = fs.statSync(downloaded);
+  if (stat.size === 0) throw new Error('yt-dlp downloaded an empty file');
+  if (stat.size > MAX_UPLOAD_BYTES) throw new Error('that video is over the 200 MB download limit');
+  return { bytes: stat.size };
 }

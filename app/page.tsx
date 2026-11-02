@@ -182,6 +182,8 @@ export default function Home() {
         <img src="/sharkwatch-logo.svg" alt="SharkWatch" width="200" style={{ flexShrink: 0, display: "block", height: "auto" }} />
         <div className="descent-nav-links">
           <Link href="/#how-it-works">How It Works</Link>
+          <Link href="/why-sharkwatch">Why SharkWatch</Link>
+          <Link href="/faq">FAQ</Link>
           <Link href="/contact">Contact</Link>
         </div>
       </nav>
@@ -206,7 +208,7 @@ export default function Home() {
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
               <div style={{ flex: 1, minWidth: 160 }}>
                 <div className="descent-mono" style={{ color: "#90e0c8", marginBottom: 6, fontSize: 11 }}>Detect</div>
-                <p style={{ fontSize: 13, color: "#c4d6db", lineHeight: 1.5, margin: 0 }}>SAM 3.1 finds sharks, people, and fish in every 6-second chunk.</p>
+                <p style={{ fontSize: 13, color: "#c4d6db", lineHeight: 1.5, margin: 0 }}>SAM 3.1 finds sharks, and people in every 6-second chunk.</p>
               </div>
               <div style={{ flex: 1, minWidth: 160 }}>
                 <div className="descent-mono" style={{ color: "#90e0c8", marginBottom: 6, fontSize: 11 }}>Verify</div>
@@ -328,6 +330,10 @@ export default function Home() {
             <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13 }}>
               <Link href="/demo" style={{ color: "#9db4bc", textDecoration: "none" }}>Demo →</Link>
               <Link href="/#how-it-works" style={{ color: "#9db4bc", textDecoration: "none" }}>How It Works →</Link>
+              <Link href="/why-sharkwatch" style={{ color: "#9db4bc", textDecoration: "none" }}>Why SharkWatch →</Link>
+              <Link href="/faq" style={{ color: "#9db4bc", textDecoration: "none" }}>FAQ →</Link>
+              <Link href="/map" style={{ color: "#9db4bc", textDecoration: "none" }}>Map →</Link>
+              <Link href="/about" style={{ color: "#9db4bc", textDecoration: "none" }}>About →</Link>
               <Link href="/contact" style={{ color: "#9db4bc", textDecoration: "none" }}>Contact →</Link>
             </div>
           </div>

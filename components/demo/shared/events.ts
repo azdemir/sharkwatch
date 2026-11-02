@@ -119,7 +119,7 @@ export type SessionEventBody =
   | { type: 'chunk.timing'; timing: ChunkTiming; costUsd: number }
   | { type: 'alert.updated'; alert: AlertJson }
   | { type: 'warning'; message: string }
-  | { type: 'session.ended'; reason: 'completed' | 'error' | 'budget'; message?: string; costUsd: number };
+  | { type: 'session.ended'; reason: 'completed' | 'error' | 'budget' | 'stopped'; message?: string; costUsd: number };
 
 export type SessionEvent = SessionEventBody & {
   sessionId: string;

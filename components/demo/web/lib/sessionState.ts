@@ -184,7 +184,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         status: 'ended',
         endReason: e.reason,
         costUsd: Math.max(state.costUsd, e.costUsd),
-        log: [...state.log, { t: e.t, level: e.reason === 'completed' ? 'info' : 'warn', text: `Patrol ${e.reason === 'completed' ? 'complete' : `ended: ${e.message ?? e.reason}`}` }],
+        log: [...state.log, { t: e.t, level: e.reason === 'completed' || e.reason === 'stopped' ? 'info' : 'warn', text: e.reason === 'completed' ? 'Patrol complete' : e.reason === 'stopped' ? 'Patrol stopped by the operator' : `Patrol ended: ${e.message ?? e.reason}` }],
       };
   }
 }

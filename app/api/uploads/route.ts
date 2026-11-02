@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { liveAvailable } from '@/components/demo/server/config';
-import { buildUploadManifest, downloadUploadVideo, MAX_UPLOAD_BYTES, newUploadId, normalisePlayback, uploadDir } from '@/components/demo/server/uploads';
+import { buildUploadManifest, downloadUploadVideo, downloadYoutubeVideo, isYoutubeUrl, MAX_UPLOAD_BYTES, newUploadId, normalisePlayback, uploadDir } from '@/components/demo/server/uploads';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,8 +54,13 @@ export async function POST(req: Request) {
     const videoUrl = typeof body.videoUrl === 'string' ? body.videoUrl.trim() : '';
     if (!videoUrl) return NextResponse.json({ error: 'Send a file, or a JSON body with a videoUrl' }, { status: 400 });
     const id = newUploadId();
-    await downloadUploadVideo(id, videoUrl);
-    await normalisePlayback(uploadDir(id), join(uploadDir(id), 'download.bin'));
+    if (isYoutubeUrl(videoUrl)) {
+      await downloadYoutubeVideo(id, videoUrl);
+      await normalisePlayback(uploadDir(id), join(uploadDir(id), 'download.mp4'));
+    } else {
+      await downloadUploadVideo(id, videoUrl);
+      await normalisePlayback(uploadDir(id), join(uploadDir(id), 'download.bin'));
+    }
     const manifest = await buildUploadManifest(id, cleanTitle(videoUrl, 'Linked footage'), { file: 'downloaded video', url: videoUrl });
     return NextResponse.json({ uploadId: id, clip: clipInfo(manifest), liveAvailable: liveAvailable(), sourceUrl: videoUrl });
   } catch (error) {

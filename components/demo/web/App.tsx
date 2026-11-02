@@ -155,7 +155,7 @@ export function App() {
   }
 
   const card = 'overflow-hidden rounded-none border border-rule bg-paper-2';
-  const statusText = state.status === 'running' ? 'Patrolling — SAM 3.1 tracking, Muse Spark verifying' : state.status === 'ended' ? 'Patrol complete' : state.status === 'error' ? 'Patrol ended with an error' : state.status === 'connecting' ? 'Connecting…' : 'Standing by — press Start patrol';
+  const statusText = state.status === 'running' ? 'Patrolling — SAM 3.1 tracking, Muse Spark verifying' : state.status === 'ended' ? (state.endReason === 'stopped' ? 'Patrol stopped by the operator' : state.endReason === 'error' || state.endReason === 'budget' ? 'Patrol ended with an error' : 'Patrol complete') : state.status === 'error' ? 'Patrol ended with an error' : state.status === 'connecting' ? 'Connecting…' : 'Standing by — press Start patrol';
   const detectionTitle = detection ? (detection.kind === 'person' ? 'Person' : detection.verdict === 'shark' ? capitalise(speciesPhrase(detection.verification) ?? 'shark') : detection.verdict === 'not_shark' ? capitalise((detection.verification?.label ?? 'not a shark').replace(/_/g, ' ')) : detection.verdict === 'uncertain' ? 'Needs a human look' : detection.verdict === 'verifying' ? 'Checking with Muse Spark' : 'Candidate') : 'No detection yet';
   const risk = detection ? assessRisk(detection)?.level : undefined;
   const framesSeen = state.horizonFrame >= 0 ? state.horizonFrame + 1 : 0;
@@ -226,9 +226,11 @@ export function App() {
               </button>
             </div>
             <p className="mt-3 text-[12px] leading-[1.6] text-ink-3">
-              The link must be a direct video file (for example an .mp4 link), not a watch page —
-              a page link has no video file to play. When you run Live detection from the preview
-              card, the server downloads that same link and analyses it.
+              Paste a direct video link (for example an .mp4 link), or a YouTube link copied from
+              YouTube — YouTube links are downloaded with yt-dlp on this Mac, so yt-dlp must be
+              installed (brew install yt-dlp) or the download will say so plainly. When you run
+              Live detection from the preview card, the server downloads that same link and
+              analyses it. A YouTube preview will not play in the browser until it is downloaded.
             </p>
           </section>
         )}
@@ -252,6 +254,7 @@ export function App() {
               SAM 3.1 + Muse Spark (paid calls) and draw the real boxes in the hero feed.
               Until then this is a preview only — no detection has run on it.
             </p>
+            {error && <div className="mt-4 rounded-none border border-red/40 bg-red/10 px-4 py-3 text-[13px] text-red">{error}</div>}
             <div className="mt-4 flex flex-wrap items-center gap-3">
               {health?.live ? (
                 <button type="button" className="alert-btn green" onClick={runLiveDetection} disabled={Boolean(uploadBusy) || running}>

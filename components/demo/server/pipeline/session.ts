@@ -49,7 +49,7 @@ export interface SessionOptions {
 export interface SessionResult {
   tracks: TrackSummary[];
   costUsd: number;
-  reason: 'completed' | 'error' | 'budget';
+  reason: 'completed' | 'error' | 'budget' | 'stopped';
 }
 
 const sleep = (ms: number, signal?: AbortSignal) =>
@@ -113,7 +113,7 @@ export async function runSession(options: SessionOptions): Promise<SessionResult
 
   for (const [i, chunk] of manifest.chunks.entries()) {
     if (signal?.aborted) {
-      reason = 'error';
+      reason = 'stopped';
       break;
     }
     if (realtime) {

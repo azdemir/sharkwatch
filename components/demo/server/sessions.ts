@@ -158,7 +158,7 @@ export function startReplaySession(recordingId: string, speed = 1): SessionHandl
     for (const { event, atS } of replaySchedule(recorded, started.fps)) {
       const due = atS / speed - (performance.now() - t0) / 1000;
       if (due > 0) await new Promise((r) => setTimeout(r, due * 1000));
-      if (handle.abort.signal.aborted) { bus.emit({ type: 'session.ended', reason: 'error', message: 'stopped by the operator', costUsd: recordedCost }); break; }
+      if (handle.abort.signal.aborted) { bus.emit({ type: 'session.ended', reason: 'stopped', message: 'stopped by the operator', costUsd: recordedCost }); break; }
       const { sessionId: _sid, seq: _seq, t: _t, ...body } = event;
       if (body.type === 'session.started') bus.emit({ ...body, mode: 'replay' });
       else if (body.type === 'chunk.timing') bus.emit({ ...body, costUsd: recordedCost });
@@ -195,7 +195,8 @@ export function startLiveSession(manifest: ClipManifest, passcode?: string, opts
     signal: handle.abort.signal,
     dir: opts.manifestDir,
   }).catch((error: Error) => {
-    if (!bus.ended) bus.emit({ type: 'session.ended', reason: 'error', message: error.message, costUsd: 0 });
+    // An operator stop that surfaces as a thrown abort is a stop, not a failure.
+    if (!bus.ended) bus.emit({ type: 'session.ended', reason: handle.abort.signal.aborted ? 'stopped' : 'error', message: handle.abort.signal.aborted ? 'stopped by the operator' : error.message, costUsd: 0 });
   });
   return handle;
 }
