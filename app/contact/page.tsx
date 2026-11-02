@@ -8,7 +8,7 @@ import Link from "next/link";
  * photos (not the homepage shark set, not patrol frames).
  * Interim contact route (2026-11-02, at Aziz's request): there is no
  * backend inbox yet, so the form opens the visitor's email client with
- * a message addressed to azizdemir6@gmail.com — the visitor presses
+ * a message addressed to azizdemir6@gmail.com, the visitor presses
  * Send in their mail app to deliver it. Replace this with a real
  * backend form handler when a proper inbox is wired up. */
 export default function Contact() {
@@ -45,26 +45,26 @@ export default function Contact() {
         </div>
         <figure className="why-hero why-reveal">
           <img src="https://images.pexels.com/photos/4784200/pexels-photo-4784200.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="Aerial view of a turquoise beach" loading="lazy" />
-          <figcaption>Stock photo (Pexels) — the shoreline a pilot would watch, not a SharkWatch patrol frame.</figcaption>
+          <figcaption>Stock photo (Pexels), the shoreline a pilot would watch, not a SharkWatch patrol frame.</figcaption>
         </figure>
         <div className="why-grid why-reveal">
           <div className="why-card"><div className="why-label">Beaches &amp; lifeguards</div><p>Replay a recorded patrol first, then run Live over your own footage.</p></div>
           <div className="why-card"><div className="why-label">Coastal authorities</div><p>Alerts in CAP format, with acknowledgement and all-clear built in.</p></div>
-          <div className="why-card"><div className="why-label">Drone teams</div><p>Works from ordinary drone footage — no special hardware required.</p></div>
+          <div className="why-card"><div className="why-label">Drone teams</div><p>Works from ordinary drone footage, no special hardware required.</p></div>
         </div>
         <figure className="why-photo why-reveal">
           <img src="https://images.pexels.com/photos/4784189/pexels-photo-4784189.jpeg?auto=compress&cs=tinysrgb&w=1200" alt="People surfing on a beach" loading="lazy" />
-          <figcaption>Stock photo (Pexels) — the swimmers and surfers a pilot is watching over.</figcaption>
+          <figcaption>Stock photo (Pexels), the swimmers and surfers a pilot is watching over.</figcaption>
         </figure>
         <div className="why-reveal">
         {sent ? (
           <div className="why-sent">
-            <b>Thanks{name ? `, ${name}` : ""} — your email client should have opened.</b>
-            <p>Your message was addressed to azizdemir6@gmail.com. Press Send in your email app to deliver it — it is not sent until you do.</p>
+            <b>Thanks{name ? `, ${name}` : ""}, your email client should have opened.</b>
+            <p>Your message was addressed to azizdemir6@gmail.com. Press Send in your email app to deliver it, it is not sent until you do.</p>
             <button type="button" className="why-btn" onClick={() => setSent(false)}>Send another message</button>
           </div>
         ) : (
-          <form className="why-form" onSubmit={(e) => { e.preventDefault(); const subject = `SharkWatch pilot — ${beach || "beach enquiry"}`; const body = `Name: ${name}\nEmail: ${email}\nBeach or organisation: ${beach}\n\n${message}`; window.location.href = `mailto:azizdemir6@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; setSent(true); }}>
+          <form className="why-form" onSubmit={(e) => { e.preventDefault(); const subject = `SharkWatch pilot, ${beach || "beach enquiry"}`; const body = `Name: ${name}\nEmail: ${email}\nBeach or organisation: ${beach}\n\n${message}`; window.location.href = `mailto:azizdemir6@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; setSent(true); }}>
             <label><span>Name</span><input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" /></label>
             <label><span>Email</span><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@beach.example" /></label>
             <label><span>Beach or organisation</span><input type="text" value={beach} onChange={(e) => setBeach(e.target.value)} placeholder="Capistrano Beach, lifeguard team, council…" /></label>

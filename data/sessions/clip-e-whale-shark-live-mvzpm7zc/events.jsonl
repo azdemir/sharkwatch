@@ -1,0 +1,2 @@
+{"type":"session.started","clipId":"clip-e-whale-shark","mode":"live","fps":10,"playbackFps":30,"width":1280,"height":720,"frameCount":138,"beachName":"Off Egmont Key, Tampa Bay, FL (simulated patrol)","sessionId":"clip-e-whale-shark-live-mvzpm7zc","seq":0,"t":0}
+{"type":"session.ended","reason":"error","message":"spawn /Users/azizdemir/Desktop/sharkwatch/.next/server/vendor-chunks/ffmpeg ENOENT","costUsd":0,"sessionId":"clip-e-whale-shark-live-mvzpm7zc","seq":1,"t":0.002}

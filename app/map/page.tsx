@@ -5,7 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 
 // Patrol locations map: one marker per demo clip that carries a scene
-// location, straight from /api/clips. No invented beaches — clips without a
+// location, straight from /api/clips. No invented beaches, clips without a
 // scene location are listed below the map instead of being placed on it.
 const MapView = dynamic(() => import("./MapView"), { ssr: false, loading: () => <div style={{ height: 480, display: "grid", placeItems: "center", color: "#9db4bc" }}>Loading map…</div> });
 
@@ -30,14 +30,14 @@ export default function MapPage() {
       </nav>
       <main className="contact-main">
         <h1>Patrol <em>map.</em></h1>
-        <p className="contact-intro">Where the demo patrols were recorded. Locations come from the clips themselves — simulated patrols are labelled as such in their beach name.</p>
+        <p className="contact-intro">Where the demo patrols were recorded. Locations come from the clips themselves, simulated patrols are labelled as such in their beach name.</p>
         {error ? <p style={{ color: "#ffb454" }}>{error}</p> : null}
         <div style={{ height: 480, border: "1px solid rgba(238,244,243,.18)", margin: "24px 0" }}>
           <MapView clips={placed} />
         </div>
         <div className="contact-grid">
           {placed.map((c) => (
-            <div key={c.id}><div className="descent-mono" style={{ color: "#90e0c8", marginBottom: 6, fontSize: 11 }}>{c.scene?.beachName}</div><p>{c.title} — {c.scene?.center?.lat.toFixed(4)}°, {c.scene?.center?.lon.toFixed(4)}°</p></div>
+            <div key={c.id}><div className="descent-mono" style={{ color: "#90e0c8", marginBottom: 6, fontSize: 11 }}>{c.scene?.beachName}</div><p>{c.title}, {c.scene?.center?.lat.toFixed(4)}°, {c.scene?.center?.lon.toFixed(4)}°</p></div>
           ))}
           {unplaced.map((c) => (
             <div key={c.id}><div className="descent-mono" style={{ color: "#9db4bc", marginBottom: 6, fontSize: 11 }}>No location on file</div><p>{c.title}</p></div>

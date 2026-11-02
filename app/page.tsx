@@ -18,7 +18,7 @@ export default function Home() {
 
   // Wired to the existing MVP model (master branch code, unchanged on dev):
   // lib/detect.ts via POST /api/detect, and lib/store.ts via GET /api/reports.
-  // Nothing is created automatically — logging a report only happens when
+  // Nothing is created automatically, logging a report only happens when
   // the user presses the button below, so loading the landing is side-effect free.
   const [reports, setReports] = useState<Report[] | null>(null);
   const [detection, setDetection] = useState<Detection | null>(null);
@@ -51,9 +51,9 @@ export default function Home() {
       setReports(Array.isArray(reportsData.reports) ? reportsData.reports : []);
       setDetection(detectData.detection ?? null);
     } catch {
-      // Fall back to the static Descent copy — the page must never break
+      // Fall back to the static Descent copy, the page must never break
       // just because the model APIs are unreachable.
-      setModelError("Model APIs unreachable — showing the static Descent copy.");
+      setModelError("Model APIs unreachable, showing the static Descent copy.");
     } finally {
       setModelLoading(false);
     }
@@ -169,16 +169,16 @@ export default function Home() {
 
   const beach = reports ? beachStatus(reports) : null;
 
-  // Keep the original static stage copy — the model section below
+  // Keep the original static stage copy, the model section below
   // carries the live detection data.
   const stages = DESCENT_STAGES;
 
-  // Clean hero — just the video, no text overlay
+  // Clean hero, just the video, no text overlay
   const hero = { ...DESCENT_STAGES[0], heading: "", headingEm: "", body: "", facts: [] };
 
   return (
     <div className="descent-page">
-      <h1 className="sr-only">SharkWatch — drone shark detection and authority alerts</h1>
+      <h1 className="sr-only">SharkWatch, drone shark detection and authority alerts</h1>
       <nav className="descent-nav">
         <Link href="/" style={{ flexShrink: 0, display: "block" }}><img src="/sharkwatch-logo.svg" alt="SharkWatch" width="200" style={{ display: "block", height: "auto" }} /></Link>
         <div className="descent-nav-links">
@@ -240,12 +240,12 @@ export default function Home() {
             <h2>FIRST,<br /><em>it is seen.</em></h2>
             <p>
               SAM 3.1 traces it in dashed amber while Muse Spark checks it.
-              People in frame are pixelated first — identification comes
+              People in frame are pixelated first, identification comes
               before alarm.
             </p>
             <p className="how-cine-detail">
               Drone footage is analysed in 6-second chunks, at 10 frames per
-              second. A track has to be seen in 8 frames before it counts —
+              second. A track has to be seen in 8 frames before it counts,
               a single flash of kelp or glare does not become an alert.
             </p>
           </div>
@@ -261,7 +261,7 @@ export default function Home() {
             <p className="how-cine-detail">
               Dolphins, seals, rays and kelp are screened out here, before
               anyone is alerted. Risk is scored from species, size, distance
-              to the nearest person, swim-zone position and shore approach —
+              to the nearest person, swim-zone position and shore approach,
               a docile shark far offshore never becomes a critical alert.
             </p>
           </div>
@@ -279,7 +279,7 @@ export default function Home() {
             <p className="how-cine-detail">
               A critical alert nobody acknowledges escalates after 45
               seconds. A second shark at the same level does not start a
-              second alarm — it updates the open incident instead.
+              second alarm, it updates the open incident instead.
             </p>
           </div>
         </div>
@@ -292,15 +292,15 @@ export default function Home() {
           </div>
           <div className="how-mode-grid">
             <div>
-              <h3>Replay — free, no key</h3>
+              <h3>Replay, free, no key</h3>
               <p>
                 A recorded run of the real pipeline, at real-time speed.
                 No new API calls, no cost, and the agencies in it are
-                simulated — no real agency is contacted in Replay.
+                simulated, no real agency is contacted in Replay.
               </p>
             </div>
             <div>
-              <h3>Live — SAM 3.1 + Muse Spark, local only</h3>
+              <h3>Live, SAM 3.1 + Muse Spark, local only</h3>
               <p>
                 Runs the models on footage as it plays, locally, with a
                 Meta key in .env. It does not run on this public Vercel
@@ -311,14 +311,14 @@ export default function Home() {
             </div>
           </div>
           <div style={{ borderTop: "1px solid rgba(238,244,243,.18)", marginTop: 28, paddingTop: 24 }}>
-            <h3>Measured in Replay — not a promise</h3>
-            <p>
+            <h3>Measured in Replay, not a promise</h3>
+            <p style={{ marginTop: 12 }}>
               These numbers come from the recorded runs themselves, not
               from a live deployment. Replay makes no new API calls, so
               its cost is the recorded cost of the original Live run.
               There are 7 recorded patrols in Replay.
             </p>
-            <div className="how-mode-grid">
+            <div className="how-measured-grid">
               <div>
                 <h3>Capistrano Beach, 19.1 s</h3>
                 <p>
@@ -333,7 +333,7 @@ export default function Home() {
                 <h3>Screened out, not alerted</h3>
                 <p>
                   In the same Capistrano run, a person track was seen for
-                  only 2 frames, then dropped. It never became an alert —
+                  only 2 frames, then dropped. It never became an alert,
                   the 8-frame rule is what stops a flash from becoming an
                   alarm.
                 </p>
@@ -343,20 +343,20 @@ export default function Home() {
                 <p>
                   Capistrano $0.005. The swimmer clip (clip-b) recorded
                   $0.042. That is the recorded range for those two runs
-                  only — not a price for every beach, and not a
+                  only, not a price for every beach, and not a
                   subscription. Replay itself costs $0 in new calls.
                 </p>
               </div>
             </div>
-            <p>
+            <p style={{ marginTop: 24 }}>
               What this does not prove: no lifeguard has piloted
               SharkWatch on a real beach yet, no accuracy percentage is
               claimed, and Replay agencies and locations are simulated.
-              Bites are already extremely rare — the Why page cites ISAF
-              at 1 in 4,332,817 for a fatal encounter — so the claim here
+              Bites are already extremely rare, the Why page cites ISAF
+              at 1 in 4,332,817 for a fatal encounter, so the claim here
               is faster warning, not a safe ocean.
             </p>
-            <p>
+            <p style={{ marginTop: 16 }}>
               Pilot ask: one beach, one lifeguard contact, and permission
               to run Replay on that beach&apos;s own drone footage, then a
               Telegram alert test. No partner is claimed until one says

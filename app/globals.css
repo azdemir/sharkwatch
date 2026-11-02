@@ -392,6 +392,15 @@ button { font: inherit; cursor: pointer; }
 .how-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .how-mode-grid > div { border: 1px solid #2a3f54; background: #0a121c; padding: 24px; }
 .how-mode-grid h3 { margin: 0 0 10px; font-size: 18px; }
+/* Measured section: 3 cards, one row, equal height. The old 2-column
+ * grid left the third card alone on a second row with a blank cell
+ * beside it — that was the alignment break in the screenshot. Stack
+ * to one column below 860px instead of 2, so it can never orphan a
+ * card again at tablet widths. */
+.how-measured-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: stretch; margin-top: 24px; }
+.how-measured-grid > div { border: 1px solid #2a3f54; background: #0a121c; padding: 24px; }
+.how-measured-grid h3 { margin: 0 0 10px; font-size: 18px; }
+@media (max-width: 860px) { .how-measured-grid { grid-template-columns: 1fr; } }
 .how-cta { margin-top: 56px; display: flex; gap: 16px; flex-wrap: wrap; }
 .how-cta .descent-btn { margin-top: 0; }
 @media (max-width: 700px) {
