@@ -191,6 +191,41 @@ body {
 .controls .primary.stop { background: transparent; color: var(--color-ink); border: 1px solid var(--color-rule-strong); }
 .controls .primary.stop:hover { background: var(--color-paper-2); }
 
+/* Alert actions, exactly the Run Again primary button's shape — plain CSS, not
+ * Tailwind utilities, so they cannot drift from it again: same 48px height,
+ * same 28px side padding, same 13px bold uppercase text, centred by line-height
+ * for buttons and by flex for the CAP link, so all three sit on one line. */
+.alert-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+}
+.alert-btn {
+  height: 48px;
+  box-sizing: border-box;
+  padding: 0 28px;
+  border: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  line-height: 1;
+}
+.alert-btn.light { background: var(--color-ink); color: #04090f; }
+.alert-btn.light:hover { opacity: 0.9; }
+.alert-btn.green { background: var(--color-green); color: #04090f; }
+.alert-btn.green:hover { filter: brightness(1.1); }
+.alert-btn.outline { background: transparent; color: var(--color-ink-2); border: 1px solid var(--color-rule-strong); }
+.alert-btn.outline:hover { background: var(--color-paper-2); color: var(--color-ink); }
+
 .place {
   font-family: var(--font-sans);
   font-style: normal;

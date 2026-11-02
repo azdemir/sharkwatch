@@ -83,8 +83,6 @@ export function MapPanel({
   if (!scene || !geometry) {
     return <div className="chart-grid grid h-full place-items-center text-[13px] text-ink-3">No location data for this clip.</div>;
   }
-  const lat = scene.center.lat;
-  const lon = scene.center.lon;
   // The distance that matters on a chart: the selected shark (or the one in view nearest shore, else
   // the last seen) to the beach.
   const placed = (list: TrackSummary[]) => list.filter((t) => t.kind === 'animal' && t.verdict === 'shark' && t.position && t.distanceToShoreM !== undefined);
@@ -166,9 +164,6 @@ export function MapPanel({
         })}
       </MapContainer>
 
-      <div className="num pointer-events-none absolute left-3 top-2.5 z-[500] bg-[#04090f]/70 px-1.5 py-0.5 font-mono text-[10.5px] text-ink">
-        {Math.abs(lat).toFixed(4)}°{lat >= 0 ? 'N' : 'S'} {Math.abs(lon).toFixed(4)}°{lon >= 0 ? 'E' : 'W'}
-      </div>
       <div className="absolute bottom-1 right-2 z-[500] bg-[#04090f]/70 px-1.5 py-0.5 text-[10px] text-ink-2">
         Tiles © <a href="https://www.esri.com" target="_blank" rel="noreferrer" className="hover:text-ink">Esri</a> · Coastline © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="hover:text-ink">OpenStreetMap contributors</a>
       </div>

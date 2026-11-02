@@ -104,15 +104,15 @@ export function App() {
       </header>
 
       <div className="mx-auto flex w-full max-w-[1560px] flex-col gap-5 px-4 pb-8 pt-7 sm:px-6 lg:px-7">
-        {/* Hero row: smaller video (7 cols, ~860px wide, ~485px tall) with 'Where it is'
+        {/* Hero row: smaller video (7 cols, ~860px wide, ~485px tall) with the map
             beside it (5 cols), instead of a full-width video on its own. No headline on
-            the video — the place name and 'watched from above' were removed. */}
+            the video — the place name and 'watched from above' were removed, and the
+            map card has no 'Where it is' header or coordinates either. */}
         <section className="grid min-w-0 grid-cols-1 items-stretch gap-5 lg:grid-cols-12">
           <div className="overflow-hidden rounded-none border border-rule bg-monitor lg:col-span-7">
             {clip ? <DroneFeed clip={clip} state={state} selectedId={selectedId} /> : <div className="aspect-video h-full bg-monitor" />}
           </div>
           <div className={`${card} flex flex-col lg:col-span-5`}>
-            <div className="card-head"><h2 className="label">Where it is</h2>{clip?.scene && <span className="num font-mono text-[11px] text-ink-3">{Math.abs(clip.scene.center.lat).toFixed(4)}°{clip.scene.center.lat >= 0 ? 'N' : 'S'} {Math.abs(clip.scene.center.lon).toFixed(4)}°{clip.scene.center.lon >= 0 ? 'E' : 'W'}</span>}</div>
             <div className="min-h-[320px] flex-1">{clip && <MapPanel clip={clip} tracks={tracks} departed={departed} selectedId={selectedId} onSelect={setSelectedId} />}</div>
           </div>
         </section>
@@ -181,22 +181,25 @@ export function App() {
                   ))}
                 </ul>
                 {currentAlert.telegramDelivered ? <p className="mt-2 text-[12px] text-ink-3">On {currentAlert.telegramDelivered} phone{currentAlert.telegramDelivered === 1 ? '' : 's'} via Telegram</p> : null}
-                <div className="mt-4 flex flex-wrap gap-3">
+                {/* All three actions in the Run Again button's style (.alert-btn in
+                    demo.css, copied from .controls .primary): same 48px height,
+                    same padding and text, so they line up exactly like it. */}
+                <div className="alert-actions">
                   {currentAlert.status !== 'resolved' && currentAlert.recipients.length > 0 && (
                     <>
-                      <button type="button" onClick={() => void api.acknowledge(currentAlert.id, 'lifeguards', 'Operator').catch(() => {})} className="h-9 rounded-none border border-rule-strong px-4 text-[12px] font-[700] uppercase tracking-[0.06em] hover:bg-paper">Acknowledge</button>
-                      <button type="button" onClick={() => void api.resolve(currentAlert.id).catch(() => {})} className="h-9 rounded-none border border-green px-4 text-[12px] font-[700] uppercase tracking-[0.06em] text-green hover:bg-green hover:text-paper">All clear</button>
+                      <button type="button" onClick={() => void api.acknowledge(currentAlert.id, 'lifeguards', 'Operator').catch(() => {})} className="alert-btn light">Acknowledge</button>
+                      <button type="button" onClick={() => void api.resolve(currentAlert.id).catch(() => {})} className="alert-btn green">All clear</button>
                     </>
                   )}
-                  <a href={api.capUrl(currentAlert.id)} target="_blank" rel="noreferrer" className="text-[13px] text-ink-2 underline decoration-rule-strong underline-offset-[3px] hover:text-ink">CAP XML</a>
+                  <a href={api.capUrl(currentAlert.id)} target="_blank" rel="noreferrer" className="alert-btn outline">CAP XML</a>
                 </div>
               </div>
             ) : (
               <p className="mt-3 text-[13px] leading-[1.6] text-ink-2">No alerts yet. When a shark is confirmed, the alert, its recipients and their acknowledgements appear here.</p>
             )}
             {alerts.length > 1 && <p className="mt-3 text-[12px] text-ink-3">{alerts.length} alerts this session, latest first in the log below.</p>}
-            {telegram?.enabled && <p className="mt-4 border-t border-rule pt-3 text-[12px] text-ink-2">Alerts on Telegram{telegram.username ? ` · @${telegram.username}` : ''} · {telegram.subscribers ?? 0} subscribed{telegram.link ? <> · <a href={telegram.link} target="_blank" rel="noreferrer" className="underline">Join</a></> : null}</p>}
-            <p className="mt-auto pt-4 text-[12px] leading-[1.7] text-ink-3">Exercise · simulated agencies. No real agency is contacted in Replay. Unacknowledged critical alerts escalate after 45 s.</p>
+            {telegram?.enabled && <p className="mt-4 flex flex-wrap items-center gap-2 border-t border-rule pt-3 text-[14px] text-ink-2"><svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#229ED9" /><g transform="translate(3,3) scale(0.75)" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13" /><path d="M22 2 15 22 11 13 2 9 22 2" /></g></svg><span>Alerts on Telegram{telegram.username ? ` · @${telegram.username}` : ''} · {telegram.subscribers ?? 0} subscribed{telegram.link ? <> · <a href={telegram.link} target="_blank" rel="noreferrer" className="underline">Join</a></> : null}</span></p>}
+            <p className="mt-auto pt-4 text-[13px] leading-[1.7] text-ink-3">Exercise · simulated agencies. No real agency is contacted in Replay. Unacknowledged critical alerts escalate after 45 s.</p>
           </section>
         </main>
 

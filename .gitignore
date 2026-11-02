@@ -4,3 +4,4 @@ out/
 data/reports.json
 *.log
 .DS_Store
+data/sessions/golden/*
