@@ -24,7 +24,6 @@ export default function Contact() {
       </nav>
 
       <main className="contact-main">
-        <p className="descent-mono" style={{ color: "#90e0c8", marginBottom: 16 }}>Contact</p>
         <h1>
           Bring SharkWatch<br />
           <em>to your beach.</em>

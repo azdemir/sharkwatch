@@ -181,6 +181,9 @@ export default function Home() {
     <div className="descent-page">
       <nav className="descent-nav">
         <img src="/sharkwatch-logo.svg" alt="SharkWatch" width="200" style={{ flexShrink: 0, display: "block", height: "auto" }} />
+        <div className="descent-nav-links">
+          <Link href="/contact">Contact</Link>
+        </div>
       </nav>
 
       <DiveStage
@@ -239,6 +242,7 @@ export default function Home() {
             <div className="descent-mono" style={{ marginBottom: 10, color: "#fff" }}>Pages</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13 }}>
               <Link href="/demo" style={{ color: "#9db4bc", textDecoration: "none" }}>Demo →</Link>
+              <Link href="/contact" style={{ color: "#9db4bc", textDecoration: "none" }}>Contact →</Link>
             </div>
           </div>
           <div>
