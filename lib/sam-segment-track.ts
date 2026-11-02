@@ -31,4 +31,4 @@ export const SAM_SEGMENT_TRACK = {
     { t: 9.0, cx: 419, top: 343, right: 644, bottom: 615 },
     { t: 9.5, cx: 406, top: 346, right: 635, bottom: 616 },
   ],
-} as const;
+};
