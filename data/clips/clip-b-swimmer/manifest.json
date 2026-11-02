@@ -1,0 +1,68 @@
+{
+  "id": "clip-b-swimmer",
+  "title": "Swimmer floating among sharks",
+  "demo": true,
+  "source": {
+    "file": "data/raw/clip-b-swimmer/source.mp4",
+    "url": "https://www.pexels.com/video/aerial-view-of-relaxation-among-sharks-in-ocean-39648190/",
+    "author": "Zihat Bepari",
+    "license": "Pexels License (https://www.pexels.com/license/)"
+  },
+  "fps": 10,
+  "playbackFps": 30,
+  "width": 720,
+  "height": 1280,
+  "frameCount": 161,
+  "durationS": 16.1,
+  "chunkFrames": 60,
+  "strideFrames": 50,
+  "chunks": [
+    {
+      "index": 0,
+      "startFrame": 0,
+      "frameCount": 60,
+      "path": "chunks/chunk-000.mp4"
+    },
+    {
+      "index": 1,
+      "startFrame": 50,
+      "frameCount": 60,
+      "path": "chunks/chunk-001.mp4"
+    },
+    {
+      "index": 2,
+      "startFrame": 100,
+      "frameCount": 60,
+      "path": "chunks/chunk-002.mp4"
+    },
+    {
+      "index": 3,
+      "startFrame": 101,
+      "frameCount": 60,
+      "path": "chunks/chunk-003.mp4"
+    }
+  ],
+  "scene": {
+    "beachName": "Offshore, Miami Beach, FL (simulated patrol)",
+    "center": {
+      "lat": 25.789733,
+      "lon": -80.125185
+    },
+    "headingDeg": 11.4,
+    "gsd": 0.0065,
+    "gsdSource": "Shell float ≈300 px vs ~1.9 m and adults ≈250 px vs ~1.7 m (±20%); refine from SAM masks",
+    "cameraMoves": false,
+    "shorelinePx": [
+      [
+        -22700,
+        -6000
+      ],
+      [
+        -22700,
+        7000
+      ]
+    ],
+    "swimZonesPx": [],
+    "notes": "Shoreline placed 150 m west (off-frame). Slight drift. Placed on the real shoreline from OpenStreetMap coastline data; the patrol itself is simulated."
+  }
+}

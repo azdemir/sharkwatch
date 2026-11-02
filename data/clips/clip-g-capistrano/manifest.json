@@ -1,0 +1,153 @@
+{
+  "id": "clip-g-capistrano",
+  "title": "Great white off Capistrano Beach",
+  "source": {
+    "file": "data/raw/clip-g-capistrano/source.webm",
+    "url": "https://commons.wikimedia.org/wiki/File:Orange_County_Police_Department_great_white_shark_warning_(HD).webm",
+    "author": "Orange County Sheriff's Department",
+    "license": "Public domain (California government work, PD-CAGov)",
+    "edits": "trimmed to 0–19 s; re-encoded at 30 fps, 720p"
+  },
+  "fps": 10,
+  "playbackFps": 30,
+  "width": 1280,
+  "height": 720,
+  "frameCount": 191,
+  "durationS": 19.1,
+  "chunkFrames": 60,
+  "strideFrames": 50,
+  "chunks": [
+    {
+      "index": 0,
+      "startFrame": 0,
+      "frameCount": 60,
+      "path": "chunks/chunk-000.mp4"
+    },
+    {
+      "index": 1,
+      "startFrame": 50,
+      "frameCount": 60,
+      "path": "chunks/chunk-001.mp4"
+    },
+    {
+      "index": 2,
+      "startFrame": 100,
+      "frameCount": 60,
+      "path": "chunks/chunk-002.mp4"
+    },
+    {
+      "index": 3,
+      "startFrame": 131,
+      "frameCount": 60,
+      "path": "chunks/chunk-003.mp4"
+    }
+  ],
+  "scene": {
+    "beachName": "Capistrano Beach, Dana Point, CA",
+    "center": {
+      "lat": 33.456807,
+      "lon": -117.672788
+    },
+    "headingDeg": 85,
+    "gsd": 0.025,
+    "gsdSource": "Assumed: the camera HUD gives the slant range (222 m) but not the zoom, so the scale assumes a ~8° field of view; oblique view (~37° down), so lengths are rough",
+    "cameraMoves": true,
+    "shorelinePx": [
+      [
+        -14948,
+        15703
+      ],
+      [
+        -12393,
+        12368
+      ],
+      [
+        -10348,
+        10025
+      ],
+      [
+        -8134,
+        7760
+      ],
+      [
+        -6210,
+        5990
+      ],
+      [
+        -5499,
+        5017
+      ],
+      [
+        -4950,
+        4482
+      ],
+      [
+        -4455,
+        3750
+      ],
+      [
+        -2637,
+        2162
+      ],
+      [
+        -20,
+        127
+      ],
+      [
+        1493,
+        -1228
+      ],
+      [
+        2792,
+        -2795
+      ],
+      [
+        5097,
+        -6280
+      ],
+      [
+        6093,
+        -7550
+      ],
+      [
+        6671,
+        -8145
+      ],
+      [
+        7756,
+        -9480
+      ],
+      [
+        8145,
+        -9957
+      ],
+      [
+        9035,
+        -10979
+      ],
+      [
+        10194,
+        -12041
+      ],
+      [
+        10957,
+        -12882
+      ],
+      [
+        12115,
+        -14590
+      ],
+      [
+        12928,
+        -15426
+      ],
+      [
+        14753,
+        -17075
+      ]
+    ],
+    "swimZonesPx": [],
+    "burnedInHud": true,
+    "notes": "Real Orange County Sheriff's helicopter camera footage from 10 May 2017, when about 15 white sharks prompted warnings from Capo Beach to San Onofre. Position from the camera HUD (image centre 33°27.408' N, 117°40.367' W; helicopter at 456 ft, 41 kts), placed against the OpenStreetMap coastline. The camera tracks the shark, so ground speed is hidden."
+  }
+}

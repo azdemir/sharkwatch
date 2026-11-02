@@ -1,0 +1,28 @@
+# Render Blueprint: New > Blueprint > connect this repository.
+# One always-on web service: the free tier sleeps after 15 minutes without traffic, which stops
+# Telegram polling and makes the first visitor wait for a cold start.
+services:
+  - type: web
+    name: sharkwatch
+    runtime: node
+    plan: starter
+    # --include=dev: the web build needs Vite even if the host sets NODE_ENV=production.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Optional. Without it the site runs Replay mode only (free).
+      - key: MODEL_API_KEY
+        sync: false
+      # Optional. Use a bot that no other running copy polls (two pollers get 409 Conflict).
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      # Set this whenever MODEL_API_KEY is set: Live sessions cost money and the URL is public.
+      - key: LIVE_PASSCODE
+        sync: false
+      - key: FRAME_BUDGET
+        value: "60000"
+      - key: AGENT_CALL_BUDGET
+        value: "300"

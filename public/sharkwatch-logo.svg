@@ -1,43 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="2100" height="600" viewBox="0 0 2100 600" role="img" aria-labelledby="title desc">
   <title id="title">SharkWatch logo</title>
-  <desc id="desc">Blue shark fin and ocean waves to the left of the SharkWatch wordmark, on a transparent background.</desc>
+  <desc id="desc">Teal shark fin and ocean waves to the left of the SharkWatch wordmark, on a transparent background.</desc>
   <defs>
     <linearGradient id="fin" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#062b68"/>
-      <stop offset=".52" stop-color="#0752ad"/>
-      <stop offset="1" stop-color="#061d4b"/>
+      <stop offset="0" stop-color="#286880"/>
+      <stop offset=".52" stop-color="#388898"/>
+      <stop offset="1" stop-color="#1a3a4a"/>
     </linearGradient>
     <linearGradient id="finEdge" x1="0" y1="0" x2="1" y2=".8">
-      <stop offset="0" stop-color="#e5fbff"/>
-      <stop offset=".42" stop-color="#4ccfff"/>
-      <stop offset="1" stop-color="#0878e9"/>
+      <stop offset="0" stop-color="#e8f0f0"/>
+      <stop offset=".42" stop-color="#90e0c8"/>
+      <stop offset="1" stop-color="#4090a0"/>
     </linearGradient>
     <linearGradient id="wave" x1="0" y1="0" x2="1" y2=".2">
-      <stop offset="0" stop-color="#087be9"/>
-      <stop offset=".48" stop-color="#11d5f4"/>
-      <stop offset="1" stop-color="#0874e8"/>
+      <stop offset="0" stop-color="#4090a0"/>
+      <stop offset=".48" stop-color="#7fe3c8"/>
+      <stop offset="1" stop-color="#388898"/>
     </linearGradient>
     <linearGradient id="wave2" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#0754c7"/>
-      <stop offset=".55" stop-color="#087ce9"/>
-      <stop offset="1" stop-color="#063a9a"/>
+      <stop offset="0" stop-color="#307080"/>
+      <stop offset=".55" stop-color="#4090a0"/>
+      <stop offset="1" stop-color="#1a3a4a"/>
     </linearGradient>
     <linearGradient id="watch" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#11d8f4"/>
-      <stop offset="1" stop-color="#0878e9"/>
+      <stop offset="0" stop-color="#7fe3c8"/>
+      <stop offset="1" stop-color="#4090a0"/>
     </linearGradient>
   </defs>
   <g transform="translate(28 28)">
     <!-- shark fin -->
     <path d="M205 345 C235 276 222 202 155 95 C145 79 152 69 177 67 C300 56 423 111 514 219 C548 260 570 302 589 345 C513 370 442 367 369 350 C309 336 256 335 205 345Z" fill="url(#fin)"/>
     <path d="M160 80 C291 79 421 139 506 250 C526 276 545 310 560 339 C527 342 494 341 462 334 C431 253 350 159 160 80Z" fill="url(#finEdge)" opacity=".96"/>
-    <path d="M160 80 C291 79 421 139 506 250 C526 276 545 310 560 339" fill="none" stroke="#16bfff" stroke-width="5" stroke-linecap="round"/>
+    <path d="M160 80 C291 79 421 139 506 250 C526 276 545 310 560 339" fill="none" stroke="#90e0c8" stroke-width="5" stroke-linecap="round"/>
     <!-- waves -->
     <path d="M8 410 C104 355 176 341 263 349 C350 357 412 400 494 391 C548 385 590 360 632 337 C597 387 546 423 479 432 C384 445 317 405 241 400 C159 394 91 414 8 455 C-1 459 -2 449 8 410Z" fill="url(#wave)"/>
     <path d="M102 448 C197 410 274 415 351 448 C425 480 492 478 557 447 C519 489 462 514 393 509 C302 502 249 456 176 457 C148 457 124 462 102 470Z" fill="url(#wave2)"/>
-    <path d="M18 410 C126 360 193 355 268 362 C355 370 412 412 493 403 C548 397 586 376 618 355" fill="none" stroke="#58e8ff" stroke-width="5" opacity=".7"/>
+    <path d="M18 410 C126 360 193 355 268 362 C355 370 412 412 493 403 C548 397 586 376 618 355" fill="none" stroke="#90e0c8" stroke-width="5" opacity=".7"/>
   </g>
   <!-- wordmark -->
-  <text x="690" y="390" font-family="Arial, Helvetica, sans-serif" font-size="250" font-weight="800" letter-spacing="-9" fill="#ffffff">Shark</text>
-  <text x="1325" y="390" font-family="Arial, Helvetica, sans-serif" font-size="250" font-weight="800" letter-spacing="-9" fill="url(#watch)">Watch</text>
+  <text x="690" y="390" font-family="Arial, Helvetica, sans-serif" font-size="250" font-weight="800" letter-spacing="-9" fill="#e8f0f0">Shark</text>
+  <text x="1325" y="390" font-family="Arial, Helvetica, sans-serif" font-size="250" font-weight="800" letter-spacing="-9" fill="#ffffff">Watch</text>
 </svg>

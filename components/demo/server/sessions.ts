@@ -1,0 +1,148 @@
+// Integrated demo sessions (Replay only, one server).
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import { getTelegramChannel } from '@/lib/telegram-server';
+import { CONFIRM_FRAMES, type SessionEvent, type TrackSummary } from '../shared/events.ts';
+import type { ClipManifest } from '../shared/manifest.ts';
+import { templateDraft } from './alerts/agent.ts';
+import { alertHub } from './alerts/hub.ts';
+import { AlertService, type AlertChannel } from './alerts/service.ts';
+import { EventBus } from './events/bus.ts';
+export interface SessionHandle { id: string; clipId: string; mode: 'live' | 'replay'; bus: EventBus; dir: string; abort: AbortController; alerts: AlertService; }
+export const DATA_DIR = join(process.cwd(), 'data');
+export const SESSIONS_DIR = join(DATA_DIR, 'sessions');
+export const GOLDEN_DIR = join(SESSIONS_DIR, 'golden');
+export function clipDir(clipId: string): string { return join(DATA_DIR, 'clips', clipId); }
+const g = globalThis as unknown as { __demoSessions?: Map<string, SessionHandle> };
+if (!g.__demoSessions) g.__demoSessions = new Map();
+const sessions = g.__demoSessions;
+export function getSession(id: string): SessionHandle | undefined { return sessions.get(id); }
+export function listClips(): ClipManifest[] {
+  const root = join(DATA_DIR, 'clips');
+  if (!existsSync(root)) return [];
+  return readdirSync(root).filter((id) => existsSync(join(root, id, 'manifest.json'))).map((id) => JSON.parse(readFileSync(join(root, id, 'manifest.json'), 'utf8')) as ClipManifest).sort((a, b) => clipRank(a) - clipRank(b) || a.id.localeCompare(b.id));
+}
+function clipRank(m: ClipManifest): number { return m.demo ? 2 : m.scene?.shorelinePx.length ? 0 : 1; }
+export function loadManifest(clipId: string): ClipManifest | undefined {
+  if (!/^[\w-]+$/.test(clipId)) return undefined;
+  const path = join(clipDir(clipId), 'manifest.json');
+  return existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as ClipManifest) : undefined;
+}
+export interface RecordingInfo { id: string; clipId: string; golden: boolean; }
+export function listRecordings(): RecordingInfo[] {
+  const out: RecordingInfo[] = [];
+  const scan = (dir: string, golden: boolean) => {
+    if (!existsSync(dir)) return;
+    for (const name of readdirSync(dir)) {
+      const events = join(dir, name, 'events.jsonl');
+      if (name === 'golden' || !existsSync(events)) continue;
+      const first = readFileSync(events, 'utf8').split('\n', 1)[0];
+      const started = first ? (JSON.parse(first) as SessionEvent) : undefined;
+      if (started?.type !== 'session.started') continue;
+      out.push({ id: relative(SESSIONS_DIR, join(dir, name)), clipId: started.clipId, golden });
+    }
+  };
+  scan(GOLDEN_DIR, true);
+  scan(SESSIONS_DIR, false);
+  return out;
+}
+function newId(clipId: string, mode: string): string { return `${clipId}-${mode}-${Date.now().toString(36)}`; }
+export class LiveUnavailableError extends Error {}
+function demoTelegramChannel(): AlertChannel | undefined {
+  const channel = getTelegramChannel();
+  if (!channel) return undefined;
+  const gg = globalThis as unknown as { __sharkwatchDemoTelegramAck?: boolean };
+  if (!gg.__sharkwatchDemoTelegramAck) {
+    gg.__sharkwatchDemoTelegramAck = true;
+    channel.onAcknowledge(({ alertId, by }) => { alertHub.acknowledge(alertId, 'lifeguards', by); });
+  }
+  return { broadcast: async (alert) => (await channel.broadcast(alert)).size };
+}
+function alertServiceFor(bus: EventBus, sessionId: string, clipId: string, dir: string): AlertService {
+  const manifest = loadManifest(clipId);
+  const service = new AlertService({ bus, sessionId, clipId, locationName: manifest?.scene?.beachName ?? clipId, sessionDir: dir, draft: async (r) => templateDraft(r, 'Templates used (integrated demo, Replay only)'), telegram: demoTelegramChannel(), escalateAfterS: 45, onChange: (alert) => alertHub.publish(alert) });
+  alertHub.register(sessionId, service);
+  return service;
+}
+const REPLAY_LEAD_S = 2;
+const REPLAY_VERDICT_DELAY_S = 1.5;
+export function replaySchedule(events: SessionEvent[], fps: number): { event: SessionEvent; atS: number }[] {
+  let horizon = -1;
+  const firstSeenAt = new Map<string, number>();
+  const seen = new Map<string, number>();
+  const confirmedAt = new Map<string, number>();
+  const introduced = new Set<string>();
+  const verifyingAt = new Map<string, number>();
+  const decided = new Set<string>();
+  const early = new Set<SessionEvent>();
+  const final = new Set(['shark', 'not_shark', 'uncertain']);
+  const chunkEnd = () => (horizon + 1) / fps;
+  const scheduled = events.map((event, order) => {
+    let atS: number;
+    if (event.type === 'frames' && event.frames.length) {
+      for (const f of event.frames) {
+        for (const o of f.objects) {
+          if (!firstSeenAt.has(o.trackId)) firstSeenAt.set(o.trackId, f.frame / fps);
+          if ((o.confidence ?? 1) < 0.5 || confirmedAt.has(o.trackId)) continue;
+          const n = (seen.get(o.trackId) ?? 0) + 1;
+          seen.set(o.trackId, n);
+          if (n >= CONFIRM_FRAMES) confirmedAt.set(o.trackId, f.frame / fps);
+        }
+      }
+      atS = Math.max(0, event.frames[0]!.frame / fps - REPLAY_LEAD_S);
+      horizon = Math.max(horizon, event.frames.at(-1)!.frame);
+    } else if (event.type === 'session.started') { atS = 0; }
+    else if (event.type === 'track.updated') {
+      const id = event.track.id;
+      const verdict = event.track.verdict ?? 'pending';
+      if (final.has(verdict) && verifyingAt.has(id) && !decided.has(id)) {
+        const basedOn = event.track.verification?.basedOnFrame;
+        const ready = basedOn === undefined ? chunkEnd() : Math.max(verifyingAt.get(id)!, (basedOn + 1) / fps);
+        atS = ready + REPLAY_VERDICT_DELAY_S;
+        decided.add(id);
+        early.add(event);
+      } else if (verdict === 'verifying' && !verifyingAt.has(id)) { atS = Math.min(confirmedAt.get(id) ?? chunkEnd(), chunkEnd()); verifyingAt.set(id, atS); }
+      else if (!introduced.has(id)) { atS = Math.min(firstSeenAt.get(id) ?? chunkEnd(), chunkEnd()); }
+      else { atS = chunkEnd(); }
+      introduced.add(id);
+    } else { atS = chunkEnd(); }
+    return { event, atS, order };
+  });
+  const end = scheduled.find((s) => s.event.type === 'session.ended');
+  if (end) { end.atS = Math.max(...scheduled.map((s) => s.atS)); end.order = Infinity; }
+  scheduled.sort((a, b) => a.atS - b.atS || a.order - b.order);
+  const known = new Map<string, TrackSummary>();
+  for (const s of scheduled) {
+    if (s.event.type !== 'track.updated') continue;
+    const { track } = s.event;
+    const base = known.get(track.id);
+    if (early.has(s.event) && base) {
+      const length = base.length && track.length ? { ...base.length, reliable: track.length.reliable, unreliableReason: track.length.unreliableReason } : (base.length ?? track.length);
+      s.event = { ...s.event, track: { ...base, verdict: track.verdict, verification: track.verification, evidence: track.evidence, length } };
+    }
+    known.set(track.id, s.event.track);
+  }
+  return scheduled.map(({ event, atS }) => ({ event, atS }));
+}
+export function startReplaySession(recordingId: string, speed = 1): SessionHandle {
+  const dir = join(SESSIONS_DIR, recordingId);
+  if (relative(SESSIONS_DIR, dir).startsWith('..') || !existsSync(join(dir, 'events.jsonl'))) throw new Error(`unknown recording ${recordingId}`);
+  const recorded = readFileSync(join(dir, 'events.jsonl'), 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line) as SessionEvent).filter((e) => e.type !== 'alert.updated');
+  const started = recorded[0];
+  if (started?.type !== 'session.started') throw new Error(`${recordingId} is not a session recording`);
+  const id = newId(started.clipId, 'replay');
+  const bus = new EventBus(id);
+  const handle: SessionHandle = { id, clipId: started.clipId, mode: 'replay', bus, dir, abort: new AbortController(), alerts: alertServiceFor(bus, id, started.clipId, dir) };
+  sessions.set(id, handle);
+  const t0 = performance.now();
+  void (async () => {
+    for (const { event, atS } of replaySchedule(recorded, started.fps)) {
+      const due = atS / speed - (performance.now() - t0) / 1000;
+      if (due > 0) await new Promise((r) => setTimeout(r, due * 1000));
+      if (handle.abort.signal.aborted) { bus.emit({ type: 'session.ended', reason: 'error', message: 'stopped by the operator', costUsd: 0 }); break; }
+      const { sessionId: _sid, seq: _seq, t: _t, ...body } = event;
+      bus.emit(body.type === 'session.started' ? { ...body, mode: 'replay' } : body);
+    }
+  })();
+  return handle;
+}

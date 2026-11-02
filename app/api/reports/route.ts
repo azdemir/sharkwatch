@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readReports, writeReports, newRef } from "@/lib/store";
+import { broadcastReport } from "@/lib/telegram-server";
 import { BEACHES, SPECIES_LIST } from "@/lib/types";
 import type { Report } from "@/lib/types";
 
@@ -36,8 +37,9 @@ export async function POST(req: Request) {
   const reports = await readReports();
   reports.unshift(report);
   await writeReports(reports);
-  // In production, this is where the authority webhook / SMS / email fires.
-  // For the MVP it is logged server-side and surfaced instantly in /alerts and /dashboard.
-  console.log(`[SHARKWATCH ALERT] ${report.ref} ${report.species} at ${report.beach} — status NEW`);
+  // Telegram (moved from sharkwatch-vite): best-effort broadcast to subscribers.
+  // A Telegram failure must never fail the report itself.
+  const telegramDelivered = await broadcastReport(report);
+  console.log(`[SHARKWATCH ALERT] ${report.ref} ${report.species} at ${report.beach} — status NEW — telegram delivered to ${telegramDelivered}`);
   return NextResponse.json({ report }, { status: 201 });
 }

@@ -1,0 +1,2 @@
+<58f>0<|box;x1=383;y1=656;x2=471;y2=719;w=1280;h=720;c=0.8012422323226929|><|mask;x=0;y=0;c=0.8012422323226929;data=64,89,!!!!!]FFlXTQe3gDJC/Lal)V!)ZaxkF_NT=r%KUpj`HK(16s[6ScH(p]F'I8sSt/KYmW+*in:c|>
+<59f>0<|box;x1=367;y1=649;x2=468;y2=719;w=1280;h=720;c=0.8012422323226929|><|mask;x=0;y=0;c=0.8012422323226929;data=71,102,!!!!!hEW&=.31mG.X)Ak[-*Jf`vn$[.+]7lip=HoCog[Z@EaUKT2G5KH5&Y&F%+IaE^3b6[Hp#H43MBXs&mQU@0P|>

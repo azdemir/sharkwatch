@@ -1,0 +1,6 @@
+node_modules/
+.next/
+out/
+data/reports.json
+*.log
+.DS_Store

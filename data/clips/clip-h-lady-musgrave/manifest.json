@@ -1,0 +1,270 @@
+{
+  "id": "clip-h-lady-musgrave",
+  "title": "Blacktip reef shark in the shallows",
+  "source": {
+    "file": "data/raw/clip-h-lady-musgrave/source.webm",
+    "url": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_a_blacktip_reef_shark_(Carcharhinus_melanopterus)_at_Lady_Musgrave_Island,_Queensland,_Australia.webm",
+    "author": "Adam Fish",
+    "license": "CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/)",
+    "edits": "trimmed to 0–13 s; re-encoded at 30 fps, 720p"
+  },
+  "fps": 10,
+  "playbackFps": 30,
+  "width": 1280,
+  "height": 720,
+  "frameCount": 130,
+  "durationS": 13,
+  "chunkFrames": 60,
+  "strideFrames": 50,
+  "chunks": [
+    {
+      "index": 0,
+      "startFrame": 0,
+      "frameCount": 60,
+      "path": "chunks/chunk-000.mp4"
+    },
+    {
+      "index": 1,
+      "startFrame": 50,
+      "frameCount": 60,
+      "path": "chunks/chunk-001.mp4"
+    },
+    {
+      "index": 2,
+      "startFrame": 70,
+      "frameCount": 60,
+      "path": "chunks/chunk-002.mp4"
+    }
+  ],
+  "scene": {
+    "beachName": "Kahala reef flat, Honolulu, HI (simulated patrol)",
+    "center": {
+      "lat": 21.269097,
+      "lon": -157.775479
+    },
+    "headingDeg": 62,
+    "gsd": 0.009,
+    "gsdSource": "Sea cucumbers ≈ 28 px at 6 s vs ~25 cm (±40%); the drone descends during the clip, so later frames read longer",
+    "cameraMoves": true,
+    "shorelinePx": [
+      [
+        14642,
+        52650
+      ],
+      [
+        13426,
+        49448
+      ],
+      [
+        5273,
+        37276
+      ],
+      [
+        4188,
+        35610
+      ],
+      [
+        -3740,
+        23612
+      ],
+      [
+        -6132,
+        12986
+      ],
+      [
+        -7321,
+        7742
+      ],
+      [
+        -10267,
+        796
+      ],
+      [
+        -10308,
+        -8383
+      ],
+      [
+        -10510,
+        -14190
+      ],
+      [
+        -10262,
+        -14879
+      ],
+      [
+        -9340,
+        -15814
+      ],
+      [
+        -7641,
+        -16371
+      ],
+      [
+        -7261,
+        -16588
+      ],
+      [
+        -7180,
+        -16741
+      ],
+      [
+        -7214,
+        -16881
+      ],
+      [
+        -7664,
+        -17340
+      ],
+      [
+        -9178,
+        -18521
+      ],
+      [
+        -9935,
+        -19270
+      ],
+      [
+        -10371,
+        -20320
+      ],
+      [
+        -10545,
+        -22627
+      ],
+      [
+        -10141,
+        -24255
+      ],
+      [
+        -9651,
+        -26820
+      ],
+      [
+        -8656,
+        -30250
+      ],
+      [
+        -8367,
+        -32119
+      ],
+      [
+        -8025,
+        -33425
+      ],
+      [
+        -7590,
+        -34499
+      ],
+      [
+        -7039,
+        -35855
+      ],
+      [
+        -6580,
+        -36890
+      ],
+      [
+        -5975,
+        -38177
+      ],
+      [
+        -5644,
+        -38644
+      ],
+      [
+        -4961,
+        -38753
+      ],
+      [
+        -3891,
+        -38717
+      ],
+      [
+        -3548,
+        -38642
+      ],
+      [
+        -3016,
+        -38328
+      ],
+      [
+        -1867,
+        -37552
+      ],
+      [
+        -1723,
+        -37470
+      ],
+      [
+        -1464,
+        -37402
+      ],
+      [
+        -1562,
+        -37829
+      ],
+      [
+        -1717,
+        -38163
+      ],
+      [
+        -1944,
+        -38485
+      ],
+      [
+        -2203,
+        -38812
+      ],
+      [
+        -2675,
+        -39258
+      ],
+      [
+        -3188,
+        -39548
+      ],
+      [
+        -3828,
+        -39629
+      ],
+      [
+        -4036,
+        -39488
+      ],
+      [
+        -4248,
+        -39429
+      ],
+      [
+        -5608,
+        -39724
+      ],
+      [
+        -7193,
+        -40123
+      ],
+      [
+        -8563,
+        -40900
+      ],
+      [
+        -8737,
+        -41441
+      ],
+      [
+        -8705,
+        -41730
+      ],
+      [
+        -9198,
+        -42313
+      ],
+      [
+        -8948,
+        -46463
+      ]
+    ],
+    "swimZonesPx": [],
+    "notes": "Footage from Lady Musgrave Island, Queensland, Australia, placed 110 m off Kahala Beach, Honolulu (OpenStreetMap coastline), where blacktip reef sharks also live; the patrol itself is simulated. The drone follows the shark, so ground speed is hidden."
+  }
+}

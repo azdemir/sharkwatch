@@ -1,0 +1,193 @@
+@import 'tailwindcss';
+@import 'leaflet/dist/leaflet.css';
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/newsreader/opsz-italic.css';
+@import '@fontsource/fragment-mono/400.css';
+
+/*
+ * Chart room. The page reads like a nautical chart: buff paper, ink, hairline rules instead of
+ * boxes, italic serif for places. Colour is reserved for meaning and borrowed from the coast:
+ * International Orange for sharks and the one main action, the US lifeguard purple flag
+ * (dangerous marine life) and double red (water closed) for alert levels, chart magenta for
+ * lines drawn on the chart. The video sits in a dark monitor so footage keeps its contrast.
+ * Overlay colours drawn on the video are mirrored in lib/overlay.ts.
+ */
+@theme {
+  --color-paper: #f3eee2;
+  --color-paper-2: #ebe4d3;
+  --color-sheet: #faf7ef;
+  --color-rule: #d6ccb6;
+  --color-rule-strong: #b8ab8f;
+  --color-ink: #14212a;
+  --color-ink-2: #4b5960;
+  --color-ink-3: #5f6a6f;
+
+  --color-orange: #f2541b;
+  --color-orange-ink: #b23a0e;
+  --color-purple: #5b3a9b;
+  --color-red: #c8232c;
+  --color-yellow: #e9b824;
+  --color-yellow-ink: #7d5f00;
+  --color-green: #2b7448;
+  --color-magenta: #b4246e;
+  --color-water: #cfe3ec;
+  --color-chart-deep: #f7f8f4;
+  --color-chart-land: #ead9a8;
+
+  --color-monitor: #0b1014;
+  --color-monitor-2: #151c21;
+  --color-monitor-ink: #e6ebec;
+  --color-monitor-dim: #8d989c;
+
+  --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
+  --font-mono: 'Fragment Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-orange) 28%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Signage: narrow, heavy capitals for the few words that must read from across a tower. */
+.signage {
+  font-stretch: 68%;
+  font-weight: 760;
+  letter-spacing: 0.005em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+/* Section labels: sentence case, quiet, sitting on a hairline. */
+.label {
+  font-size: 12px;
+  font-weight: 620;
+  color: var(--color-ink-2);
+  letter-spacing: 0.005em;
+}
+
+.place {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-optical-sizing: auto;
+}
+
+/* Chart paper texture: a faint survey grid behind empty areas. */
+.chart-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--color-rule) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-rule) 45%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Chart hatching, as charts mark restricted areas: here, the simulated agencies. */
+.hatch {
+  background-image: repeating-linear-gradient(-45deg, var(--color-rule-strong) 0 1px, transparent 1px 4px);
+}
+
+/* Thin scrollbars that belong to the paper. */
+.scroll-quiet {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-rule-strong) transparent;
+}
+
+/* The chart is drawn, not tiled; Leaflet only provides the projection and interaction. */
+.leaflet-container {
+  font-family: var(--font-sans);
+}
+.leaflet-control-attribution {
+  background: color-mix(in srgb, var(--color-paper) 85%, transparent) !important;
+  color: var(--color-ink-2) !important;
+  font-size: 10px;
+}
+.leaflet-control-attribution a {
+  color: var(--color-ink) !important;
+}
+.leaflet-control-scale-line {
+  border: 1.5px solid var(--color-ink) !important;
+  border-top: none !important;
+  background: color-mix(in srgb, var(--color-paper) 80%, transparent) !important;
+  color: var(--color-ink) !important;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.3;
+}
+.leaflet-tooltip {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border: none;
+  border-radius: 1px;
+  box-shadow: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 2px 6px;
+}
+.leaflet-tooltip-top::before {
+  border-top-color: var(--color-ink);
+}
+/* Distances lettered on the chart itself, in chart magenta. */
+.leaflet-tooltip.chart-label {
+  background: color-mix(in srgb, var(--color-paper) 88%, transparent);
+  color: var(--color-magenta);
+  font-size: 10.5px;
+  padding: 0 4px;
+}
+.leaflet-tooltip.chart-label::before {
+  display: none;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+.sweep {
+  animation: sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes beacon {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+.beacon {
+  animation: beacon 1.2s steps(2, jump-none) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep,
+  .beacon {
+    animation: none;
+  }
+}

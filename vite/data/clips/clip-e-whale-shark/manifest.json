@@ -1,0 +1,193 @@
+{
+  "id": "clip-e-whale-shark",
+  "title": "Whale shark offshore",
+  "source": {
+    "file": "data/raw/clip-e-whale-shark/source.mp4",
+    "url": "https://www.pexels.com/video/aerial-view-of-whale-shark-in-pristine-waters-36628330/",
+    "author": "Sergey Guk",
+    "license": "Pexels License (https://www.pexels.com/license/)"
+  },
+  "fps": 10,
+  "playbackFps": 30,
+  "width": 1280,
+  "height": 720,
+  "frameCount": 138,
+  "durationS": 13.8,
+  "chunkFrames": 60,
+  "strideFrames": 50,
+  "chunks": [
+    {
+      "index": 0,
+      "startFrame": 0,
+      "frameCount": 60,
+      "path": "chunks/chunk-000.mp4"
+    },
+    {
+      "index": 1,
+      "startFrame": 50,
+      "frameCount": 60,
+      "path": "chunks/chunk-001.mp4"
+    },
+    {
+      "index": 2,
+      "startFrame": 78,
+      "frameCount": 60,
+      "path": "chunks/chunk-002.mp4"
+    }
+  ],
+  "scene": {
+    "beachName": "Off Egmont Key, Tampa Bay, FL (simulated patrol)",
+    "center": {
+      "lat": 27.59,
+      "lon": -82.79
+    },
+    "headingDeg": 0,
+    "gsd": 0.039,
+    "gsdSource": "Assumed altitude ~35 m, no reference object",
+    "cameraMoves": true,
+    "shorelinePx": [
+      [
+        63363,
+        -3265
+      ],
+      [
+        63964,
+        1351
+      ],
+      [
+        68583,
+        14664
+      ],
+      [
+        70142,
+        22368
+      ],
+      [
+        70745,
+        24012
+      ],
+      [
+        75890,
+        30552
+      ],
+      [
+        79981,
+        37270
+      ],
+      [
+        81451,
+        39041
+      ],
+      [
+        83731,
+        40354
+      ],
+      [
+        86847,
+        41389
+      ],
+      [
+        87311,
+        42073
+      ],
+      [
+        87174,
+        39942
+      ],
+      [
+        85986,
+        36717
+      ],
+      [
+        82156,
+        32942
+      ],
+      [
+        78732,
+        27531
+      ],
+      [
+        76882,
+        21818
+      ],
+      [
+        75970,
+        16222
+      ],
+      [
+        75929,
+        9138
+      ],
+      [
+        77029,
+        1734
+      ],
+      [
+        77391,
+        -4427
+      ],
+      [
+        78028,
+        -8545
+      ],
+      [
+        79306,
+        -12568
+      ],
+      [
+        80276,
+        -18867
+      ],
+      [
+        79973,
+        -26398
+      ],
+      [
+        79304,
+        -29947
+      ],
+      [
+        78440,
+        -32181
+      ],
+      [
+        76217,
+        -34982
+      ],
+      [
+        73301,
+        -37276
+      ],
+      [
+        70487,
+        -37156
+      ],
+      [
+        68949,
+        -36095
+      ],
+      [
+        68128,
+        -34580
+      ],
+      [
+        67495,
+        -32323
+      ],
+      [
+        67127,
+        -20279
+      ],
+      [
+        64559,
+        -10625
+      ],
+      [
+        63363,
+        -3265
+      ]
+    ],
+    "swimZonesPx": [],
+    "notes": "Open water 2.5 km off Egmont Key at the mouth of Tampa Bay (island outline from OpenStreetMap via Nominatim). Slight drift. The location is plausible for the footage; the patrol itself is simulated."
+  }
+}

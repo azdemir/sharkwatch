@@ -1,0 +1,162 @@
+@import 'tailwindcss';
+@import 'leaflet/dist/leaflet.css';
+
+/* SharkWatch design pattern (from the homepage): dark ocean, light text,
+ * teal/cyan accents, Palatino serif-italic for place names, hairline rules.
+ * The demo keeps its chart layout and alert colours, but on the same dark
+ * palette as SharkWatch instead of light chart paper. */
+@theme {
+  --color-paper: #000812;
+  --color-paper-2: #011631;
+  --color-sheet: #042233;
+  --color-rule: #24465e;
+  --color-rule-strong: #3a5f7a;
+  --color-ink: #eef4f3;
+  --color-ink-2: #c4d6db;
+  --color-ink-3: #9db4bc;
+  --color-orange: #ff5a1f;
+  --color-orange-ink: #ffb454;
+  --color-purple: #b18cff;
+  --color-red: #ff5a4d;
+  --color-yellow: #e9b824;
+  --color-yellow-ink: #ffd84d;
+  --color-green: #2fd67a;
+  --color-magenta: #f472b6;
+  --color-water: #7ee7ff;
+  --color-chart-deep: #0b2a3d;
+  --color-chart-land: #ead9a8;
+  --color-monitor: #000812;
+  --color-monitor-2: #011631;
+  --color-monitor-ink: #e6ebec;
+  --color-monitor-dim: #8d989c;
+  --font-sans: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: Palatino, Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #044a73 0%, #011631 35%, #000812 100%);
+  background-attachment: fixed;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in srgb, #90e0c8 28%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid #7ee7ff;
+  outline-offset: 2px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.signage {
+  font-stretch: 68%;
+  font-weight: 760;
+  letter-spacing: 0.005em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 620;
+  color: var(--color-ink-2);
+  letter-spacing: 0.005em;
+}
+
+.place {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-optical-sizing: auto;
+}
+
+.chart-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--color-rule) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-rule) 45%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.hatch {
+  background-image: repeating-linear-gradient(-45deg, var(--color-rule-strong) 0 1px, transparent 1px 4px);
+}
+
+.scroll-quiet {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-rule-strong) transparent;
+}
+
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: #042233;
+}
+.leaflet-control-attribution {
+  background: color-mix(in srgb, #042233 85%, transparent) !important;
+  color: var(--color-ink-2) !important;
+  font-size: 10px;
+}
+.leaflet-control-attribution a {
+  color: var(--color-ink) !important;
+}
+.leaflet-control-scale-line {
+  border: 1.5px solid var(--color-ink) !important;
+  border-top: none !important;
+  background: color-mix(in srgb, #042233 80%, transparent) !important;
+  color: var(--color-ink) !important;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.3;
+}
+.leaflet-tooltip {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border: none;
+  border-radius: 1px;
+  box-shadow: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 2px 6px;
+}
+.leaflet-tooltip-top::before {
+  border-top-color: var(--color-ink);
+}
+.leaflet-tooltip.chart-label {
+  background: color-mix(in srgb, var(--color-paper) 88%, transparent);
+  color: var(--color-magenta);
+  font-size: 10.5px;
+  padding: 0 4px;
+}
+.leaflet-tooltip.chart-label::before {
+  display: none;
+}
+
+@keyframes sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+.sweep { animation: sweep 1.6s ease-in-out infinite; }
+
+@keyframes beacon {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.beacon { animation: beacon 1.2s steps(2, jump-none) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep, .beacon { animation: none; }
+}
