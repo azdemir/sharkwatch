@@ -8,9 +8,7 @@ lifeguards in seconds — before an alarm goes out, not after.
 **Demo:** https://sharkwatch.vercel.app/demo
 **Local:** http://localhost:3000 (demo: http://localhost:3000/demo)
 
-Built for the **Meta Global AI Developer Hackathon 2026** (Meta and
-Cerebral Valley, 26 October – 4 November 2026, submissions due 4 November
-2026 at 9:00 PM ET, $1,000,000 prize pool). See "Meta models" below for
+Built for the **Meta Global AI Developer Hackathon 2026** See "Meta models" below for
 exactly which Meta models this project uses, and which hackathon models
 it does not.
 
