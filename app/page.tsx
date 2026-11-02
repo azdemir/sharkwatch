@@ -191,7 +191,7 @@ export default function Home() {
       <DiveStage
         stage={hero}
         isHero
-        tracker
+        segmentTag
         video={DESCENT_VIDEO}
         poster={DESCENT_POSTER}
         videoPaused={videoPaused}

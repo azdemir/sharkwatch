@@ -256,7 +256,9 @@ export function App() {
             </p>
             {error && <div className="mt-4 rounded-none border border-red/40 bg-red/10 px-4 py-3 text-[13px] text-red">{error}</div>}
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              {health?.live ? (
+              {health?.uploads === false ? (
+                <span className="text-[13px] text-ink-2">Uploads and Live detection are not available on Vercel — Vercel has a read-only filesystem, no yt-dlp, and no long-running server for SAM/Spark sessions. Run the demo locally with npm run dev to use uploads and Live detection. Replay clips still work here.</span>
+              ) : health?.live ? (
                 <button type="button" className="alert-btn green" onClick={runLiveDetection} disabled={Boolean(uploadBusy) || running}>
                   {uploadBusy ? uploadBusy : 'Run Live detection'}
                 </button>

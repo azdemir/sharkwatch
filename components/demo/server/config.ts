@@ -28,6 +28,16 @@ export function liveAvailable(): boolean {
   return Boolean(config.modelApiKey);
 }
 
+/** Uploads (and therefore Live over uploaded footage) need a writable disk,
+ * yt-dlp for YouTube links, and a long-running server for SAM/Spark sessions.
+ * Vercel serverless has none of those: /var/task is read-only (uploads hit
+ * ENOENT on mkdir), there is no yt-dlp, and functions time out. So uploads
+ * are local-dev only — Vercel must fail fast with a plain message, never
+ * with a raw ENOENT. Vercel sets VERCEL=1. */
+export function uploadsAvailable(): boolean {
+  return !process.env.VERCEL;
+}
+
 export function requireModelApiKey(): string {
   if (!config.modelApiKey) {
     throw new Error('No Meta API key is set. Add MODEL_API_KEY (or META_KEY) to .env next to package.json, then restart the dev server.');

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { liveAvailable } from '@/components/demo/server/config';
+import { liveAvailable, uploadsAvailable } from '@/components/demo/server/config';
 import { buildUploadManifest, downloadUploadVideo, downloadYoutubeVideo, isYoutubeUrl, MAX_UPLOAD_BYTES, newUploadId, normalisePlayback, uploadDir } from '@/components/demo/server/uploads';
 
 export const dynamic = 'force-dynamic';
@@ -30,6 +30,10 @@ function cleanTitle(name: string, fallback: string): string {
 }
 
 export async function POST(req: Request) {
+  // Fail fast on Vercel instead of crashing on mkdir into read-only /var/task.
+  if (!uploadsAvailable()) {
+    return NextResponse.json({ error: 'Uploads and Live detection are not available on Vercel. Vercel serverless functions have a read-only filesystem, no yt-dlp, and no long-running server for SAM/Spark sessions. Run the demo locally with npm run dev to use uploads and Live detection.' }, { status: 501 });
+  }
   const contentType = req.headers.get('content-type') ?? '';
   try {
     if (contentType.includes('multipart/form-data')) {

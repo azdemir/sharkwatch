@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getTelegramChannel } from '@/lib/telegram-server';
-import { config, liveAvailable } from '@/components/demo/server/config';
+import { config, liveAvailable, uploadsAvailable } from '@/components/demo/server/config';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +12,7 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     live: liveAvailable(),
+    uploads: uploadsAvailable(),
     livePasscodeRequired: Boolean(config.livePasscode),
     telegram: getTelegramChannel() !== null,
   });
