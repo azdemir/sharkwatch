@@ -1,7 +1,6 @@
 import type { MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
 import { useRef } from "react";
 import type { DiveStage as DiveStageData } from "@/lib/descent";
-import HeroTracker from "@/components/descent/HeroTracker";
 import SegmentTag from "@/components/descent/SegmentTag";
 
 type DiveStageProps = {
@@ -13,7 +12,6 @@ type DiveStageProps = {
   videoRef?: RefObject<HTMLVideoElement>;
   onToggleVideo?: () => void;
   overlay?: ReactNode;
-  tracker?: boolean;
   segmentTag?: boolean;
 };
 
@@ -26,7 +24,6 @@ export default function DiveStage({
   videoRef,
   onToggleVideo,
   overlay,
-  tracker = false,
   segmentTag = false,
 }: DiveStageProps) {
   const tiltRef = useRef<HTMLDivElement>(null);
@@ -71,7 +68,6 @@ export default function DiveStage({
           <div className="shark-3d-shine" aria-hidden="true" />
         </div>
       )}
-      {isHero && tracker && <HeroTracker videoRef={videoRef} />}
       {isHero && segmentTag && <SegmentTag videoRef={videoRef} />}
       {!isHero && <div className={`descent-dark ${stage.darkClass}`} />}
       <div className="descent-inner">

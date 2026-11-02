@@ -178,8 +178,9 @@ export default function Home() {
 
   return (
     <div className="descent-page">
+      <h1 className="sr-only">SharkWatch — drone shark detection and authority alerts</h1>
       <nav className="descent-nav">
-        <img src="/sharkwatch-logo.svg" alt="SharkWatch" width="200" style={{ flexShrink: 0, display: "block", height: "auto" }} />
+        <Link href="/" style={{ flexShrink: 0, display: "block" }}><img src="/sharkwatch-logo.svg" alt="SharkWatch" width="200" style={{ display: "block", height: "auto" }} /></Link>
         <div className="descent-nav-links">
           <Link href="/#how-it-works">How It Works</Link>
           <Link href="/why-sharkwatch">Why SharkWatch</Link>
@@ -321,7 +322,7 @@ export default function Home() {
 
       <footer className="descent-footer">
         <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
-          <img src="/sharkwatch-logo.svg" alt="SharkWatch" width="180" style={{ flexShrink: 0, display: "block", height: "auto" }} />
+          <Link href="/" style={{ flexShrink: 0, display: "block" }}><img src="/sharkwatch-logo.svg" alt="SharkWatch" width="180" style={{ display: "block", height: "auto" }} /></Link>
 
         </div>
         <div style={{ display: "flex", gap: 40, flexWrap: "wrap" }}>
