@@ -2,33 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import DepthMeter from "@/components/descent/DepthMeter";
 import DiveStage from "@/components/descent/DiveStage";
 import {
   DESCENT_POSTER,
-  DESCENT_SEQUENCE,
   DESCENT_STAGES,
   DESCENT_VIDEO,
 } from "@/lib/descent";
 import { beachStatus } from "@/lib/types";
 import type { Detection, Report } from "@/lib/types";
-
-const BUBBLES = [
-  { left: "8%", size: 10, dur: 14, delay: 0 },
-  { left: "22%", size: 6, dur: 19, delay: 3 },
-  { left: "68%", size: 12, dur: 16, delay: 1 },
-  { left: "86%", size: 7, dur: 22, delay: 5 },
-  { left: "45%", size: 9, dur: 18, delay: 2 },
-];
-
-const DEPTH_TARGETS = [
-  { id: "surface", label: "0 m — Surface" },
-  { id: "d10", label: "10 m — Great White" },
-  { id: "d30", label: "30 m — Hammerhead" },
-  { id: "d80", label: "80 m — Tiger" },
-  { id: "abyss", label: "200 m — Abyss" },
-  { id: "return", label: "↥ Return" },
-];
 
 export default function Home() {
   const [progress, setProgress] = useState(0);
@@ -186,162 +167,38 @@ export default function Home() {
     }
   };
 
-  const activeReport = reports?.find((r) =>
-    ["NEW", "VERIFIED", "DISPATCHED"].includes(r.status),
-  );
-  const latestReport = reports?.[0];
   const beach = reports ? beachStatus(reports) : null;
 
-  // Stage facts become model-derived when the model has answered, and
-  // stay on the original static copy while it loads or if it fails.
-  // The hero itself carries the model too, so the demo starts at the top
-  // of the page instead of only in the model section further down.
-  const stages = DESCENT_STAGES.map((stage) => {
-    if (stage.id === "surface" && detection && beach && latestReport) {
-      return {
-        ...stage,
-        facts: [
-          { label: "Model — detected", value: detection.species },
-          { label: "Confidence", value: `${detection.confidence}%` },
-          { label: "Beach status", value: beach.label },
-          { label: "Latest report", value: latestReport.ref },
-        ],
-      };
-    }
-    if (stage.id === "d10" && detection) {
-      return {
-        ...stage,
-        facts: [
-          { label: "Model — detected", value: detection.isShark ? "Shark" : "Not a shark" },
-          { label: "Species", value: detection.species },
-          { label: "Confidence", value: `${detection.confidence}%` },
-          { label: "Length", value: `${detection.estimatedLengthM.toFixed(1)} m` },
-        ],
-      };
-    }
-    if (stage.id === "d30" && detection) {
-      return {
-        ...stage,
-        facts: [
-          { label: "Species", value: detection.species },
-          { label: "Confidence", value: `${detection.confidence}%` },
-          { label: "Risk", value: detection.risk },
-          { label: "Moving", value: `${detection.direction} · ${detection.speedKt} kt` },
-        ],
-      };
-    }
-    if (stage.id === "d80" && beach && activeReport) {
-      return {
-        ...stage,
-        facts: [
-          { label: "Beach status", value: beach.label },
-          { label: "Latest report", value: activeReport.ref },
-          { label: "Species", value: activeReport.species },
-        ],
-      };
-    }
-    return stage;
-  });
+  // Keep the original static stage copy — the model section below
+  // carries the live detection data.
+  const stages = DESCENT_STAGES;
 
-  const sequence =
-    detection && latestReport
-      ? [
-          { label: "Sighted", value: latestReport.species },
-          { label: "Confirmed", value: `${detection.confidence}%` },
-          { label: "Alert sent", value: latestReport.status },
-          { label: "Acknowledged", value: latestReport.ref },
-        ]
-      : DESCENT_SEQUENCE;
-
-  const [hero, ...restStages] = stages;
-
-  const heroOverlay = modelLoading ? (
-    <p className="descent-mono">Demo model — running detection…</p>
-  ) : detection ? (
-    <>
-      <p className="descent-mono">
-        Demo model · {detection.species} · {detection.confidence}% ·{" "}
-        {detection.risk} · {detection.action}
-      </p>
-      {beach ? (
-        <p className="descent-mono">Beach status: {beach.label}</p>
-      ) : null}
-      <div className="descent-hero-model-actions">
-        <button
-          type="button"
-          className="descent-btn"
-          onClick={() => void loadModel()}
-        >
-          Re-run detection
-        </button>
-        <button
-          type="button"
-          className="descent-btn solid"
-          onClick={() => void logDetectionAsReport()}
-          disabled={loggingBusy}
-        >
-          {loggingBusy ? "Logging…" : "Log as report"}
-        </button>
-        <Link href="/demo" className="descent-btn" style={{ textDecoration: "none" }}>
-          Open Demo →
-        </Link>
-        <a
-          href="http://localhost:5173/"
-          target="_blank"
-          rel="noreferrer"
-          className="descent-btn"
-          style={{ textDecoration: "none" }}
-        >
-          Open 5173 demo ↗
-        </a>
-      </div>
-      {loggedRef ? (
-        <p className="descent-mono">Logged as {loggedRef}.</p>
-      ) : null}
-    </>
-  ) : (
-    <p className="descent-mono">
-      Demo model unavailable — showing the static Descent copy.{" "}
-      <Link href="/demo">Open Demo →</Link>
-    </p>
-  );
+  // Clean hero — just the video, no text overlay
+  const hero = { ...DESCENT_STAGES[0], heading: "", headingEm: "", body: "", facts: [] };
+  const restStages = DESCENT_STAGES.slice(1);
 
   return (
     <div className="descent-page">
       <nav className="descent-nav">
-        <b>SHARKWATCH</b>
-        <span className="descent-mono">The Descent · Simulated feed</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+            <path d="M4 28 C6 24, 8 18, 12 10 C14 6, 16 4, 18 6 C20 8, 22 14, 24 20 C26 24, 28 27, 28 28 Z" fill="#7fe3c8" opacity="0.9" />
+            <path d="M4 28 C6 24, 8 18, 12 10 C14 6, 16 4, 18 6 C20 8, 22 14, 24 20 C26 24, 28 27, 28 28" stroke="#ffb454" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M12 28 C14 22, 16 16, 18 12 C19 10, 20 12, 21 16 C22 20, 23 24, 24 28 Z" fill="#01080e" opacity="0.25" />
+          </svg>
+          <span style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            <b style={{ letterSpacing: ".22em", fontSize: 15, color: "#fff", lineHeight: 1 }}>SHARKWATCH</b>
+            <span style={{ fontSize: 9, letterSpacing: ".12em", color: "#9db4bc", textTransform: "uppercase", marginTop: 2, fontWeight: 400 }}>Drone Shark Detection</span>
+          </span>
+        </span>
         <span className="descent-nav-links">
-          <Link href="/demo">Demo →</Link>
+          <a href="http://localhost:5173/" target="_blank" rel="noreferrer">Demo →</a>
           <Link href="/detect">Detect</Link>
           <Link href="/alerts">Alerts</Link>
           <Link href="/dashboard">Dashboard</Link>
           <Link href="/report">Report</Link>
         </span>
       </nav>
-
-      <DepthMeter
-        depthLabel={depthLabel}
-        progress={progress}
-        targets={DEPTH_TARGETS}
-        activeId=""
-        onJump={jumpTo}
-      />
-
-      <div className="descent-bubbles" aria-hidden>
-        {BUBBLES.map((bubble, i) => (
-          <span
-            key={i}
-            style={{
-              left: bubble.left,
-              width: bubble.size,
-              height: bubble.size,
-              animationDuration: `${bubble.dur}s`,
-              animationDelay: `${bubble.delay}s`,
-            }}
-          />
-        ))}
-      </div>
 
       <DiveStage
         stage={hero}
@@ -351,103 +208,39 @@ export default function Home() {
         videoPaused={videoPaused}
         videoRef={videoRef}
         onToggleVideo={toggleVideo}
-        overlay={heroOverlay}
-      />
-
-      <section className="descent-model" id="model">
-        <div className="descent-rv">
-          <div className="descent-mono" style={{ color: "#9db4bc" }}>
-            Model · Live on this page · Demo detector, not a real SAM model
-          </div>
-          <h2>
-            The model, <em>not just the story.</em>
-          </h2>
-          <p>
-            This section reads the same code the Detect page uses:{" "}
-            <code>lib/detect.ts</code> through <code>POST /api/detect</code>{" "}
-            and <code>lib/store.ts</code> through <code>GET /api/reports</code>.
-            The stages below now carry these numbers instead of hardcoded copy.
-          </p>
-          {modelLoading ? (
-            <p className="descent-mono" style={{ marginTop: 28 }}>
-              Running demo detection…
+        overlay={
+          <>
+            <h2 style={{ fontSize: "clamp(44px, 6vw, 88px)", margin: "0 0 12px", lineHeight: 1.05 }}>
+              The model, <em style={{ fontFamily: "Palatino, Georgia, serif", fontStyle: "italic", fontWeight: 400, color: "#7fe3c8" }}>not just the story.</em>
+            </h2>
+            <p style={{ fontSize: 16, color: "#c4d6db", lineHeight: 1.6, maxWidth: 420, margin: "0 0 20px" }}>
+              SharkWatch doesn't just show you footage — it understands it. Every frame is analyzed by Meta SAM 3.1 for detection and Muse Spark for verification, so you know exactly what's in the water before any alert goes out.
             </p>
-          ) : modelError && !detection && !reports ? (
-            <p className="descent-mono" style={{ marginTop: 28 }}>
-              {modelError}
-            </p>
-          ) : (
-            <>
-              {detection ? (
-                <div className="descent-model-grid descent-mono">
-                  <div>
-                    Species<span><b>{detection.species}</b></span>
-                  </div>
-                  <div>
-                    Confidence<span><b>{detection.confidence}%</b></span>
-                  </div>
-                  <div>
-                    Risk<span><b>{detection.risk}</b></span>
-                  </div>
-                  <div>
-                    Length<span><b>{detection.estimatedLengthM.toFixed(1)} m</b></span>
-                  </div>
-                  <div>
-                    Tracking<span><b>{detection.direction} · {detection.speedKt} kt</b></span>
-                  </div>
-                  <div>
-                    Box<span><b>{detection.bbox.x}, {detection.bbox.y} · {detection.bbox.w}×{detection.bbox.h}</b></span>
-                  </div>
-                </div>
-              ) : null}
-              {detection ? <p>{detection.action}</p> : null}
-              {latestReport ? (
-                <p className="descent-mono" style={{ marginTop: 20 }}>
-                  Latest report: {latestReport.ref} · {latestReport.species} ·{" "}
-                  {latestReport.beach} · {latestReport.status}
-                </p>
-              ) : null}
-              {beach ? (
-                <p className="descent-mono" style={{ marginTop: 8 }}>
-                  Beach status: {beach.label} — {beach.detail}
-                </p>
-              ) : null}
-              <div style={{ marginTop: 28, display: "flex", gap: 16, flexWrap: "wrap" }}>
-                <button
-                  type="button"
-                  className="descent-btn"
-                  onClick={() => void loadModel()}
-                  disabled={modelLoading}
-                >
-                  Re-run detection
-                </button>
-                <button
-                  type="button"
-                  className="descent-btn solid"
-                  onClick={() => void logDetectionAsReport()}
-                  disabled={!detection || loggingBusy}
-                >
-                  {loggingBusy ? "Logging…" : "Log this detection as a report"}
-                </button>
-                <Link href="/detect" className="descent-btn" style={{ textDecoration: "none", display: "inline-block" }}>
-                  Open Detect →
-                </Link>
-                <Link href="/demo" className="descent-btn solid" style={{ textDecoration: "none", display: "inline-block" }}>
-                  Open Demo →
-                </Link>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+              <div style={{ flex: 1, minWidth: 160 }}>
+                <div className="descent-mono" style={{ color: "#7fe3c8", marginBottom: 6, fontSize: 11 }}>Detect</div>
+                <p style={{ fontSize: 13, color: "#c4d6db", lineHeight: 1.5, margin: 0 }}>SAM 3.1 finds sharks, people, and fish in every 6-second chunk.</p>
               </div>
-              {loggedRef ? (
-                <p className="descent-mono" style={{ marginTop: 20 }}>
-                  Logged as {loggedRef} — it now appears in Alerts and Dashboard.
-                </p>
-              ) : null}
-              {modelError ? (
-                <p className="descent-mono" style={{ marginTop: 20 }}>{modelError}</p>
-              ) : null}
-            </>
-          )}
-        </div>
-      </section>
+              <div style={{ flex: 1, minWidth: 160 }}>
+                <div className="descent-mono" style={{ color: "#7fe3c8", marginBottom: 6, fontSize: 11 }}>Verify</div>
+                <p style={{ fontSize: 13, color: "#c4d6db", lineHeight: 1.5, margin: 0 }}>Muse Spark screens out dolphins, seals, rays, and kelp.</p>
+              </div>
+              <div style={{ flex: 1, minWidth: 160 }}>
+                <div className="descent-mono" style={{ color: "#7fe3c8", marginBottom: 6, fontSize: 11 }}>Alert</div>
+                <p style={{ fontSize: 13, color: "#c4d6db", lineHeight: 1.5, margin: 0 }}>Confirmed sharks trigger alerts to lifeguards in seconds.</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <a href="http://localhost:5173/" target="_blank" rel="noreferrer" className="descent-btn solid" style={{ textDecoration: "none", display: "inline-block", padding: "12px 20px", fontSize: 12 }}>
+                Open Demo →
+              </a>
+              <Link href="/detect" className="descent-btn" style={{ textDecoration: "none", display: "inline-block", padding: "12px 20px", fontSize: 12 }}>
+                Try Detection →
+              </Link>
+            </div>
+          </>
+        }
+      />
 
       {restStages.map((stage) => (
         <div key={stage.id} className="descent-rv">
@@ -457,9 +250,6 @@ export default function Home() {
 
       <section className="descent-abyss" id="abyss">
         <div className="descent-rv">
-          <div className="descent-mono" style={{ color: "#9db4bc" }}>
-            200 m · Abyss · Almost no light
-          </div>
           <h2>
             The beach is the surface.
             <br />
@@ -470,20 +260,14 @@ export default function Home() {
             screen shows the tick. All clear closes it, with CAP XML marked as
             an exercise — always.
           </p>
-          <div className="descent-seq descent-mono">
-            {sequence.map((step) => (
-              <div key={step.label}>
-                {step.label}
-                <span>
-                  <b>{step.value}</b>
-                </span>
-              </div>
-            ))}
-          </div>
+          <p className="descent-mono" style={{ marginTop: 24, color: "#7fe3c8" }}>
+            From detection to alert in under 5 seconds.
+          </p>
           <button
             type="button"
             className="descent-btn solid"
             onClick={() => jumpTo("return")}
+            style={{ marginTop: 28 }}
           >
             ↥ Return to the surface
           </button>
@@ -506,78 +290,75 @@ export default function Home() {
             as it plays, about $0.03–0.20 per patrol, under $1 for all five
             clips.
           </p>
-          <div className="descent-grid">
-            <div className="descent-term">
-              <b>$</b> npm install
-              <br />
-              <b>$</b> npm run setup{" "}
-              <span style={{ color: "#8fa8b0" }}>
-                # Meta key once, saved in .env only
-              </span>
-              <br />
-              <b>$</b> npm run dev{" "}
-              <span style={{ color: "#8fa8b0" }}>
-                # localhost:3000 in this MVP
-              </span>
-              <br />
-              <br />
-              <span style={{ color: "#8fa8b0" }}>
-                Node 22.12+ · 22, 24, 26 work · avoid 23, 25 · stop with Ctrl+C
-              </span>
-            </div>
-            <div>
-              <div className="descent-step">
-                <div className="descent-step-n">01</div>
-                <div>
-                  <h4>Telegram</h4>
-                  <p>
-                    Message <code>@BotFather</code>, send <code>/newbot</code>,
-                    paste the token in <code>npm run setup</code>, restart,
-                    scan the QR under Beach status and send <code>/start</code>.
-                    One bot per running copy.
-                  </p>
-                </div>
-              </div>
-              <div className="descent-step">
-                <div className="descent-step-n">02</div>
-                <div>
-                  <h4>Try the MVP, not just the landing</h4>
-                  <p>
-                    <Link href="/detect">Detect</Link> a sample,{" "}
-                    <Link href="/report">file a report</Link>, watch it in{" "}
-                    <Link href="/alerts">Alerts</Link>, and manage it in the{" "}
-                    <Link href="/dashboard">Authority dashboard</Link>. The
-                    landing above now reads those same APIs, instead of
-                    hardcoded copy.
-                  </p>
-                </div>
-              </div>
-              <div className="descent-step">
-                <div className="descent-step-n">03</div>
-                <div>
-                  <h4>If it breaks</h4>
-                  <p>
-                    Run <code>npm run build</code> to verify the TypeScript
-                    build.
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div style={{ marginTop: 32, display: "flex", gap: 16, flexWrap: "wrap" }}>
+            <a
+              href="http://localhost:5173/"
+              target="_blank"
+              rel="noreferrer"
+              className="descent-btn solid"
+              style={{ textDecoration: "none", display: "inline-block" }}
+            >
+              Try the Demo →
+            </a>
+            <Link href="/detect" className="descent-btn" style={{ textDecoration: "none", display: "inline-block" }}>
+              Detect a Shark →
+            </Link>
+            <Link href="/report" className="descent-btn" style={{ textDecoration: "none", display: "inline-block" }}>
+              Report a Sighting →
+            </Link>
           </div>
         </div>
       </section>
 
       <footer className="descent-footer">
-        <span>
-          <b style={{ letterSpacing: ".22em", fontSize: 13, color: "#fff" }}>
-            SHARKWATCH
-          </b>{" "}
-          — The Descent · TypeScript MVP · dev branch · model wired in
-        </span>
-        <span className="descent-mono">
-          Photorealistic imagery created for this page · Simulated feed ·
-          Agencies simulated
-        </span>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+              <path d="M4 28 C6 24, 8 18, 12 10 C14 6, 16 4, 18 6 C20 8, 22 14, 24 20 C26 24, 28 27, 28 28 Z" fill="#7fe3c8" opacity="0.9" />
+              <path d="M4 28 C6 24, 8 18, 12 10 C14 6, 16 4, 18 6 C20 8, 22 14, 24 20 C26 24, 28 27, 28 28" stroke="#ffb454" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+              <b style={{ letterSpacing: ".22em", fontSize: 13, color: "#fff", lineHeight: 1 }}>SHARKWATCH</b>
+              <span style={{ fontSize: 8, letterSpacing: ".1em", color: "#9db4bc", textTransform: "uppercase", marginTop: 2, fontWeight: 400 }}>Drone Shark Detection</span>
+            </span>
+          </span>
+
+        </div>
+        <div style={{ display: "flex", gap: 40, flexWrap: "wrap" }}>
+          <div>
+            <div className="descent-mono" style={{ marginBottom: 10, color: "#fff" }}>Pages</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13 }}>
+              <a href="http://localhost:5173/" target="_blank" rel="noreferrer" style={{ color: "#9db4bc", textDecoration: "none" }}>Demo (5173) →</a>
+              <Link href="/detect" style={{ color: "#9db4bc", textDecoration: "none" }}>Detect →</Link>
+              <Link href="/report" style={{ color: "#9db4bc", textDecoration: "none" }}>Report →</Link>
+              <Link href="/alerts" style={{ color: "#9db4bc", textDecoration: "none" }}>Alerts →</Link>
+              <Link href="/dashboard" style={{ color: "#9db4bc", textDecoration: "none" }}>Dashboard →</Link>
+            </div>
+          </div>
+          <div>
+            <div className="descent-mono" style={{ marginBottom: 10, color: "#fff" }}>Tech</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13 }}>
+              <span style={{ color: "#9db4bc" }}>Meta SAM 3.1</span>
+              <span style={{ color: "#9db4bc" }}>Meta Muse Spark 1.3</span>
+              <span style={{ color: "#9db4bc" }}>Next.js 14 + TypeScript</span>
+              <span style={{ color: "#9db4bc" }}>Fastify + SSE</span>
+            </div>
+          </div>
+          <div>
+            <div className="descent-mono" style={{ marginBottom: 10, color: "#fff" }}>Info</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13 }}>
+              <span style={{ color: "#9db4bc" }}>Node 22.12+</span>
+              <span style={{ color: "#9db4bc" }}>Replay: free, no keys</span>
+              <span style={{ color: "#9db4bc" }}>Live: ~$0.03–0.20/patrol</span>
+              <span style={{ color: "#9db4bc" }}>MIT License</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ width: "100%", borderTop: "1px solid rgba(238,244,243,.18)", paddingTop: 16, marginTop: 8, display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          <span className="descent-mono" style={{ color: "#9db4bc" }}>
+            © 2026 SharkWatch
+          </span>
+        </div>
       </footer>
     </div>
   );

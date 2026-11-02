@@ -44,42 +44,29 @@ export default function DiveStage({
           alt={stage.imageAlt}
         />
       )}
-      <div className={`descent-dark ${stage.darkClass}`} />
+      {!isHero && <div className={`descent-dark ${stage.darkClass}`} />}
       <div className="descent-inner">
-        <div className="descent-meta descent-mono">
-          <span>{stage.label}</span>
-          <span>{stage.light}</span>
-        </div>
-        <h1 className={isHero ? "" : "descent-h2"}>
-          {stage.heading}
-          <br />
-          <em>{stage.headingEm}</em>
-        </h1>
-        <p>{stage.body}</p>
-        <div className="descent-data descent-mono">
-          {stage.facts.map((fact) => (
-            <div key={fact.label}>
-              {fact.label}
-              <span>
-                <b>{fact.value}</b>
-              </span>
-            </div>
-          ))}
-        </div>
-        {overlay ? <div className="descent-hero-model">{overlay}</div> : null}
-        {isHero && onToggleVideo ? (
-          <div className="descent-scroll-cue">
-            <span />
-            <span className="descent-mono">Scroll — sink</span>
-            <button
-              type="button"
-              className="descent-video-btn"
-              onClick={onToggleVideo}
-            >
-              {videoPaused ? "▶ Play video" : "⏸ Pause video"}
-            </button>
+        {(stage.heading || stage.headingEm) && (
+          <h1 className={isHero ? "" : "descent-h2"}>
+            {stage.heading}
+            {stage.heading && <br />}
+            <em>{stage.headingEm}</em>
+          </h1>
+        )}
+        {stage.body && <p>{stage.body}</p>}
+        {stage.facts.length > 0 && (
+          <div className="descent-data descent-mono">
+            {stage.facts.map((fact) => (
+              <div key={fact.label}>
+                {fact.label}
+                <span>
+                  <b>{fact.value}</b>
+                </span>
+              </div>
+            ))}
           </div>
-        ) : null}
+        )}
+        {overlay ? <div className="descent-hero-model">{overlay}</div> : null}
       </div>
     </section>
   );
