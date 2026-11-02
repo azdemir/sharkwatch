@@ -172,7 +172,7 @@ export function MapPanel({
         <circle cx="20" cy="20" r="13" fill="none" stroke={INK} strokeWidth="0.8" />
         <path d="M20 5 L23.2 20 L20 18 L16.8 20 Z" fill={INK} />
         <path d="M20 35 L23.2 20 L20 22 L16.8 20 Z" fill="none" stroke={INK} strokeWidth="0.8" />
-        <text x="20" y="4.2" textAnchor="middle" fontSize="5.5" fontFamily="Archivo Variable, sans-serif" fontWeight="700" fill={INK}>
+        <text x="20" y="4.2" textAnchor="middle" fontSize="5.5" fontFamily="-apple-system, Inter, sans-serif" fontWeight="700" fill={INK}>
           N
         </text>
       </svg>

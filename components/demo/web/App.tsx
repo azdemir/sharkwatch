@@ -73,130 +73,154 @@ export function App() {
   }
 
   const beach = clip?.scene?.beachName.replace(/ \(simulated patrol\)$/, '');
-  const control = 'h-8 rounded-[2px] text-[13px]';
+  const card = 'overflow-hidden rounded-none border border-rule bg-paper-2 shadow-[0_1px_3px_rgba(15,23,42,0.08)]';
 
   return (
-    <div className="flex min-h-full flex-col lg:h-full">
-      <header className="flex flex-wrap items-center gap-x-6 gap-y-2.5 border-b border-rule px-5 py-2.5">
-        <img src="/sharkwatch-logo.svg" alt="SharkWatch" width="160" style={{ flexShrink: 0, display: "block", height: "auto" }} />
-
-        {clip && (
-          <div className="hidden min-w-0 border-l border-rule pl-6 md:block">
-            <div className="place truncate text-[19px] leading-[1.1]">{beach ?? clip.title}</div>
-            <div className="truncate text-[11px] text-ink-3">
-              {clip.title}
-              {clip.scene ? (clip.scene.burnedInHud ? ' · real position from the camera' : ' · simulated patrol') : ''}
-            </div>
-          </div>
-        )}
-
-        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
-          <select
-            value={clipId ?? ''}
-            onChange={(e) => chooseClip(e.target.value)}
-            disabled={running}
-            className={`${control} w-full min-w-0 appearance-none border border-rule-strong bg-sheet bg-[length:10px] bg-[right_10px_center] bg-no-repeat pl-2.5 pr-8 hover:border-ink disabled:opacity-60 lg:w-auto lg:max-w-72`}
-            style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23eef4f3' stroke-width='1.4'/%3E%3C/svg%3E\")" }}
-            aria-label="Patrol footage"
-          >
-            {[false, true].map((demo) => {
-              const group = clips.filter((c) => c.demo === demo);
-              return group.length ? (
-                <optgroup key={String(demo)} label={demo ? 'Demo only (staged scene)' : 'Patrol footage'}>
-                  {group.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.title}
-                      {recordings.some((r) => r.clipId === c.id) ? '' : ' (no recording)'}
-                    </option>
-                  ))}
-                </optgroup>
-              ) : null;
-            })}
-          </select>
-
-          <div className={`${control} flex overflow-hidden border border-ink`} role="radiogroup" aria-label="Mode">
-            {(['replay', 'live'] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                role="radio"
-                aria-checked={mode === m}
-                disabled={running || (m === 'live' && !health?.live)}
-                title={m === 'live' && !health?.live ? 'Live mode needs a Meta key: run "npm run setup", then restart' : undefined}
-                onClick={() => setMode(m)}
-                className={`px-3 capitalize disabled:cursor-not-allowed ${mode === m ? 'bg-ink font-[640] text-paper' : 'text-ink-2 hover:text-ink disabled:text-ink-3/60'}`}
-              >
-                {m}
-              </button>
-            ))}
-          </div>
-
-          {running ? (
-            <button type="button" onClick={stop} className={`${control} flex items-center gap-2 border border-ink px-4 font-[650] hover:bg-ink hover:text-paper`}>
-              <span className="h-2 w-2 bg-red" />
-              Stop
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={start}
-              disabled={!canStart}
-              title={mode === 'replay' && !hasRecording ? 'No recording for this clip yet' : undefined}
-              className={`${control} bg-[#ffb454] px-4 font-[680] text-black hover:bg-[#ffc67f] disabled:cursor-not-allowed disabled:bg-rule disabled:text-ink-3`}
-            >
-              {state.status === 'ended' ? 'Run again' : 'Start patrol'}
-            </button>
-          )}
-
+    <div className="min-h-screen w-full overflow-x-hidden">
+      {/* Full-bleed nav bar, not a black card inside the page. */}
+      <header className="w-full bg-[#05080c]">
+        <div className="mx-auto flex w-full max-w-[1680px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-6 lg:px-8">
+          <a href="/" aria-label="Back to SharkWatch" className="shrink-0">
+            <img src="/sharkwatch-logo.svg" alt="SharkWatch" width="148" style={{ display: 'block', height: 'auto' }} />
+          </a>
+          <span className="num ml-auto shrink-0 font-mono text-[12px] text-[#b8c4cc]" title="Meta Model API cost for this session">
+            API ${state.costUsd.toFixed(3)}
+          </span>
         </div>
       </header>
 
-      {error && <div className="border-b border-red/40 bg-red/10 px-5 py-2 text-[13px] text-red">{error}</div>}
-
-      <main className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_400px] lg:grid-rows-[minmax(0,1fr)_auto_10.5rem]">
-        <div className="lg:col-start-1 lg:row-start-1 lg:min-h-0">
-          {clip ? <DroneFeed clip={clip} state={state} selectedId={selectedId} /> : <div className="aspect-video h-full bg-monitor lg:aspect-auto" />}
-        </div>
-
-        <aside className="flex flex-col border-b border-rule lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:min-h-0 lg:border-b-0 lg:border-l">
-          <div className="scroll-quiet lg:max-h-[62%] lg:shrink-0 lg:overflow-y-auto">
-            <StatusPanel state={state} clip={clip} />
+      <div className="mx-auto flex w-full max-w-[1680px] flex-col gap-5 px-4 pb-8 pt-5 sm:px-6 lg:px-8">
+        {/* Control bar: beach left, controls right, wrapping cleanly. */}
+        <section className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-4 rounded-none border border-rule bg-paper-2 px-5 py-4 shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
+          <div className="min-w-[220px] flex-1">
+            <h1 className="place truncate text-[22px] leading-tight">{beach ?? 'Choose footage to patrol'}</h1>
+            <p className="mt-0.5 truncate text-[13px] text-ink-3">
+              {clip ? clip.title : 'Patrol footage'}
+              {clip?.scene ? (clip.scene.burnedInHud ? ' · real position from the camera' : ' · simulated patrol') : ''}
+            </p>
           </div>
-          <div className="h-64 border-t border-rule lg:h-auto lg:min-h-[14rem] lg:flex-1">
-            {clip && <MapPanel clip={clip} tracks={tracks} departed={departed} selectedId={selectedId} onSelect={setSelectedId} />}
+          <div className="flex min-w-0 flex-wrap items-center gap-3">
+            <select
+              value={clipId ?? ''}
+              onChange={(e) => chooseClip(e.target.value)}
+              disabled={running}
+              className="h-11 min-w-[220px] max-w-full flex-1 appearance-none rounded-none border border-rule-strong bg-sheet bg-[length:10px] bg-[right_14px_center] bg-no-repeat pl-4 pr-10 text-[13px] hover:border-ink disabled:opacity-60 sm:flex-none sm:basis-[280px]"
+              style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%230f172a' stroke-width='1.4'/%3E%3C/svg%3E\")" }}
+              aria-label="Patrol footage"
+            >
+              {[false, true].map((demo) => {
+                const group = clips.filter((c) => c.demo === demo);
+                return group.length ? (
+                  <optgroup key={String(demo)} label={demo ? 'Demo only (staged scene)' : 'Patrol footage'}>
+                    {group.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.title}
+                        {recordings.some((r) => r.clipId === c.id) ? '' : ' (no recording)'}
+                      </option>
+                    ))}
+                  </optgroup>
+                ) : null;
+              })}
+            </select>
+            <div className="flex h-11 shrink-0 rounded-none border border-rule bg-sheet p-1" role="radiogroup" aria-label="Mode">
+              {(['replay', 'live'] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  role="radio"
+                  aria-checked={mode === m}
+                  disabled={running || (m === 'live' && !health?.live)}
+                  title={m === 'live' && !health?.live ? 'Live mode needs a Meta key: run "npm run setup", then restart' : undefined}
+                  onClick={() => setMode(m)}
+                  className={`h-9 rounded-none px-4 text-[13px] capitalize disabled:cursor-not-allowed ${mode === m ? 'bg-ink font-[650] text-paper' : 'text-ink-2 hover:text-ink disabled:text-ink-3/60'}`}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+            {running ? (
+              <button type="button" onClick={stop} className="flex h-11 shrink-0 items-center gap-2 rounded-none border border-rule-strong bg-sheet px-6 text-[13px] font-[650] hover:bg-paper">
+                <span className="h-2 w-2 bg-red" />
+                Stop patrol
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={start}
+                disabled={!canStart}
+                title={mode === 'replay' && !hasRecording ? 'No recording for this clip yet' : undefined}
+                className="h-11 shrink-0 rounded-none bg-[#ffb454] px-6 text-[13px] font-[700] text-black hover:bg-[#ffc67f] disabled:cursor-not-allowed disabled:bg-rule disabled:text-ink-3"
+              >
+                {state.status === 'ended' ? 'Run again' : 'Start patrol'}
+              </button>
+            )}
           </div>
-        </aside>
+        </section>
 
-        <div className="border-b border-rule lg:col-start-1 lg:row-start-2">
+        {error && <div className="rounded-none border border-red/40 bg-red/10 px-5 py-3 text-[13px] text-red">{error}</div>}
+
+        {/* Hero row: video left, status + pipeline + map stacked right. */}
+        <main className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12">
+          <div className={`${card} bg-monitor lg:col-span-8`}>
+            {clip ? <DroneFeed clip={clip} state={state} selectedId={selectedId} /> : <div className="aspect-video h-full bg-monitor" />}
+          </div>
+          <div className="flex min-w-0 flex-col gap-5 lg:col-span-4">
+            <div className={card}>
+              <StatusPanel state={state} clip={clip} />
+            </div>
+            <div className={`${card} p-5`}>
+              <h2 className="label">How it works</h2>
+              <ol className="mt-3 space-y-3">
+                <li className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-none bg-sheet font-mono text-[11px] text-ink">1</span>
+                  <span><span className="block text-[13px] font-[600]">Detect — SAM 3.1</span><span className="block text-[12px] text-ink-3">Finds animals and people in every drone frame.</span></span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-none bg-sheet font-mono text-[11px] text-ink">2</span>
+                  <span><span className="block text-[13px] font-[600]">Verify — Muse Spark</span><span className="block text-[12px] text-ink-3">Confirms it is a shark, measures it, writes the alert.</span></span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-none bg-sheet font-mono text-[11px] text-ink">3</span>
+                  <span><span className="block text-[13px] font-[600]">Alert — lifeguards</span><span className="block text-[12px] text-ink-3">Flags, Telegram and CAP go out; acknowledgement is tracked.</span></span>
+                </li>
+              </ol>
+            </div>
+            <div className={card}>
+              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule px-5 py-3">
+                <h2 className="label">Location</h2>
+                {clip?.scene && <span className="num font-mono text-[11px] text-ink-3">{Math.abs(clip.scene.center.lat).toFixed(4)}°{clip.scene.center.lat >= 0 ? 'N' : 'S'} {Math.abs(clip.scene.center.lon).toFixed(4)}°{clip.scene.center.lon >= 0 ? 'E' : 'W'}</span>}
+              </div>
+              <div className="h-80">
+                {clip && <MapPanel clip={clip} tracks={tracks} departed={departed} selectedId={selectedId} onSelect={setSelectedId} />}
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Timeline: Timeline already renders its own header — no second header here. */}
+        <section className={card}>
           {clip && <Timeline state={state} clip={clip} selectedId={selectedId} onSelect={setSelectedId} />}
-        </div>
+        </section>
 
-        <div className="grid lg:col-start-1 lg:row-start-3 lg:min-h-0 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-          <div className="flex max-h-96 min-h-[12rem] flex-col border-b border-rule lg:max-h-none lg:min-h-0 lg:border-b-0 lg:border-r">
+        {/* Contacts and Log: two separate cards with a gap between them. */}
+        <section className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2">
+          <div className={`${card} flex min-h-[22rem] flex-col`}>
             <TrackPanel tracks={tracks} departed={departed} sessionId={state.sessionId} selectedId={selectedId} onSelect={setSelectedId} showLost={showLost} onShowLost={setShowLost} />
           </div>
-          <div className="h-56 lg:h-auto lg:min-h-0">
+          <div className={`${card} min-h-[22rem]`}>
             <EventLog entries={state.log} />
           </div>
-        </div>
-      </main>
+        </section>
 
-      <footer className="border-t border-rule bg-paper-2 px-5 py-1.5 text-[11px] text-ink-2">
-        {clip?.source.author && (
-          <>
-            Footage: {clip.source.author} via{' '}
-            <a className="text-ink underline decoration-rule-strong underline-offset-2 hover:decoration-ink" href={clip.source.url} target="_blank" rel="noreferrer">
-              {sourceSite(clip.source.url)}
-            </a>
-            {clip.source.license && ` (${clip.source.license.split(' (')[0]})`} ·{' '}
-          </>
-        )}
-        {clip?.scene?.burnedInHud ? 'Location and telemetry from the camera HUD; authorities are simulated' : 'Locations, drone telemetry and authorities are simulated'} · Detection:
-        Meta SAM 3.1 · Verification: Meta Muse Spark 1.3
-        <span className="num float-right font-mono" title="Meta Model API cost for this session">
-          API ${state.costUsd.toFixed(3)}
-        </span>
-      </footer>
+        <footer className="flex min-w-0 flex-wrap items-center justify-between gap-3 border-t border-rule pt-4 text-[12px] text-ink-3">
+          <span>
+            {clip?.source.author && (
+              <>Footage: {clip.source.author} via <a className="text-ink underline decoration-rule-strong underline-offset-2 hover:decoration-ink" href={clip.source.url} target="_blank" rel="noreferrer">{sourceSite(clip.source.url)}</a>{clip.source.license && ` (${clip.source.license.split(' (')[0]})`} · </>
+            )}
+            {clip?.scene?.burnedInHud ? 'Location and telemetry from the camera HUD; authorities are simulated' : 'Locations, drone telemetry and authorities are simulated'} · Detection: Meta SAM 3.1 · Verification: Meta Muse Spark 1.3
+          </span>
+        </footer>
+      </div>
     </div>
   );
 }

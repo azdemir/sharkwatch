@@ -66,9 +66,9 @@ export function Timeline({ state, clip, selectedId, onSelect }: { state: Session
 
   return (
     <section className="flex h-full min-h-0 flex-col px-5 pb-3 pt-3">
-      <header className="mb-2 flex items-baseline justify-between gap-3">
+      <header className="mb-2 flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="label">Patrol timeline</h2>
-        <div className="flex items-center gap-3 text-[11px] text-ink-3">
+        <div className="flex flex-wrap items-center gap-3 text-[11px] text-ink-3">
           <span className="flex items-center gap-1"><span className="h-[6px] w-3 bg-orange" />shark</span>
           <span className="flex items-center gap-1"><span className="h-[6px] w-3 bg-yellow" />being checked</span>
           <span className="flex items-center gap-1"><span className="h-[7px] w-[7px] rotate-45 bg-ink" />confirmed</span>

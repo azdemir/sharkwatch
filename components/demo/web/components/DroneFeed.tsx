@@ -175,7 +175,7 @@ export function DroneFeed({ clip, state, selectedId }: Props) {
 
         {waiting && (
           <div className="absolute inset-x-0 bottom-6 flex justify-center px-6">
-            <div className="w-full max-w-md overflow-hidden rounded-[2px] bg-monitor/90 text-monitor-ink">
+            <div className="w-full max-w-md overflow-hidden rounded-none bg-monitor/90 text-monitor-ink">
               <div className="relative h-[2px] overflow-hidden bg-monitor-2">
                 <span className="sweep absolute inset-y-0 w-1/3 bg-[#ff5a1f]" />
               </div>
@@ -198,7 +198,7 @@ export function DroneFeed({ clip, state, selectedId }: Props) {
       {/* Status strip under the footage, so nothing of ours covers the picture or its own HUD. */}
       <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 border-t border-monitor-2 px-4 py-1.5 font-mono text-[11px] text-monitor-ink">
         <span className="flex items-center gap-2">
-          <span className={`h-2 w-2 rounded-full ${active ? 'beacon bg-[#ff3b30]' : 'bg-monitor-dim'}`} />
+          <span className={`h-2 w-2 ${active ? 'beacon bg-[#ff3b30]' : 'bg-monitor-dim'}`} />
           <span className="font-sans font-[680] tracking-[0.04em]">{state.status === 'idle' ? 'STANDBY' : live ? 'LIVE' : 'REPLAY'}</span>
           <span className="num">{clock(hud.time)}</span>
           <span className="num text-monitor-dim">/ {clock(clip.durationS)}</span>

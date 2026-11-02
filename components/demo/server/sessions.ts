@@ -134,14 +134,21 @@ export function startReplaySession(recordingId: string, speed = 1): SessionHandl
   const bus = new EventBus(id);
   const handle: SessionHandle = { id, clipId: started.clipId, mode: 'replay', bus, dir, abort: new AbortController(), alerts: alertServiceFor(bus, id, started.clipId, dir) };
   sessions.set(id, handle);
+  // Replay re-runs saved SAM output, so its chunk costs are 0 and the only real
+  // cost is the recorded total on session.ended — which the UI only saw at the
+  // very end (and never on Stop). Surface that recorded total from the first
+  // chunk onward, so the nav bar shows a real cost during the patrol, not $0.000.
+  const recordedCost = (recorded.find((e) => e.type === 'session.ended') as { costUsd?: number } | undefined)?.costUsd ?? 0;
   const t0 = performance.now();
   void (async () => {
     for (const { event, atS } of replaySchedule(recorded, started.fps)) {
       const due = atS / speed - (performance.now() - t0) / 1000;
       if (due > 0) await new Promise((r) => setTimeout(r, due * 1000));
-      if (handle.abort.signal.aborted) { bus.emit({ type: 'session.ended', reason: 'error', message: 'stopped by the operator', costUsd: 0 }); break; }
+      if (handle.abort.signal.aborted) { bus.emit({ type: 'session.ended', reason: 'error', message: 'stopped by the operator', costUsd: recordedCost }); break; }
       const { sessionId: _sid, seq: _seq, t: _t, ...body } = event;
-      bus.emit(body.type === 'session.started' ? { ...body, mode: 'replay' } : body);
+      if (body.type === 'session.started') bus.emit({ ...body, mode: 'replay' });
+      else if (body.type === 'chunk.timing') bus.emit({ ...body, costUsd: recordedCost });
+      else bus.emit(body);
     }
   })();
   return handle;

@@ -19,7 +19,7 @@ function Sign({ flag, word, line, color }: { flag: AlertJson['level'] | 'open'; 
     <div className="flex items-start gap-3">
       <LevelFlag level={flag} className={`h-11 w-11 shrink-0 ${flag === 'open' ? 'text-ink-3' : 'text-ink'}`} />
       <div className="min-w-0 pt-0.5">
-        <div className={`signage text-[34px] ${color}`}>{word}</div>
+        <div className={`signage text-[28px] ${color}`}>{word}</div>
         <div className="mt-1.5 text-[13px] text-ink-2">{line}</div>
       </div>
     </div>
@@ -42,7 +42,7 @@ function Timing({ alert, state }: { alert: AlertJson; state: SessionState }) {
   return (
     <div className="mt-4 border-t border-rule pt-3">
       <div className="flex items-end gap-3">
-        <span className="num text-[42px] font-[760] leading-[0.85] tracking-[-0.01em] [font-stretch:70%]">{Math.max(0, sent - sighted).toFixed(1)} s</span>
+        <span className="num text-[36px] font-[700] leading-[1] tracking-[-0.02em]">{Math.max(0, sent - sighted).toFixed(1)} s</span>
         <span className="pb-0.5 text-[13px] leading-tight text-ink-2">
           from first sighting
           <br />
@@ -91,7 +91,7 @@ function Actions({ alert }: { alert: AlertJson }) {
             await api.resolve(alert.id).catch(() => {});
             setBusy(false);
           }}
-          className="rounded-[2px] border border-green px-3 py-1 text-[13px] font-[640] text-green hover:bg-green hover:text-paper disabled:opacity-50"
+          className="rounded-none border border-green px-3 py-1 text-[13px] font-[640] text-green hover:bg-green hover:text-paper disabled:opacity-50"
         >
           All clear
         </button>
@@ -220,9 +220,9 @@ export function StatusPanel({ state, clip }: { state: SessionState; clip?: ClipI
 
   return (
     <section className="px-5 pb-4 pt-4">
-      <div className="mb-3 flex items-baseline justify-between">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="label">Beach status</h2>
-        <span className="flex items-center gap-1.5 text-[11.5px] text-ink-2" title="No real agency is contacted">
+        <span className="flex shrink-0 items-center gap-1.5 border border-rule bg-sheet px-2 py-1 text-[11px] text-ink-2" title="No real agency is contacted">
           <span className="hatch h-3 w-3 border border-rule-strong" aria-hidden />
           Exercise · simulated agencies
         </span>

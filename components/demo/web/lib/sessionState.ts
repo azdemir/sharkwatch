@@ -166,7 +166,8 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       return {
         ...state,
         timings: [...state.timings, e.timing],
-        costUsd: e.costUsd,
+        // Never let a 0-cost chunk erase a cost already shown (Replay chunks are 0).
+        costUsd: Math.max(state.costUsd, e.costUsd),
         log: [...state.log, { t: e.t, level: 'info', text: `Chunk ${e.timing.chunk} analysed${detail}` }],
       };
     }
