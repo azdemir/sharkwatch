@@ -20,7 +20,10 @@ const HIGH_RISK = /\b(white|great white|tiger|bull|oceanic whitetip|mako|great h
 const LOW_RISK = /\b(nurse|whale shark|basking|leopard|wobbegong|horn|zebra|epaulette|bamboo)\b/;
 
 export const RECIPIENTS_BY_LEVEL: Record<RiskLevel, RecipientRole[]> = {
-  advisory: [],
+  // Aziz, 2026-11-02: advisory alerts go to lifeguards on Telegram too (low-priority
+  // log message, no escalation, no beach closure) — previously [] meant advisory was
+  // logged in-app only and never reached Telegram.
+  advisory: ['lifeguards'],
   warning: ['lifeguards'],
   critical: ['lifeguards', 'beach_management', 'coastal_security'],
 };

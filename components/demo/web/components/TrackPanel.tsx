@@ -72,11 +72,11 @@ function Row({ track: t, sessionId, selected, onSelect, departed = false }: { tr
           {lengthText(t) && <span className="num shrink-0 whitespace-nowrap text-right font-mono text-[13px]">{lengthText(t)}</span>}
         </div>
         {details.length > 0 && (
-          <div className={`num mt-0.5 pl-[50px] font-mono text-[11px] ${close ? 'font-[600] text-ink' : 'text-ink-2'}`}>{details.join(' · ')}</div>
+          <div className={`num mt-0.5 pl-[62px] font-mono text-[11px] ${close ? 'font-[600] text-ink' : 'text-ink-2'}`}>{details.join(' · ')}</div>
         )}
       </button>
       {selected && (
-        <div className="px-5 pb-3 pl-[70px] text-[12.5px]">
+        <div className="px-5 pb-3 pl-[82px] text-[12.5px]">
           {t.evidence && sessionId && (
             <img src={api.evidenceUrl(sessionId, t.evidence)} alt="Evidence frame with this contact outlined" className="mb-2 aspect-video w-full border border-rule object-cover" loading="lazy" />
           )}
@@ -129,7 +129,7 @@ export function TrackPanel({
   );
   return (
     <section className="flex min-h-0 flex-col">
-      <header className="flex items-baseline justify-between gap-3 border-b border-rule px-5 pb-2 pt-3">
+      <header className="card-head">
         <h2 className="label">Contacts</h2>
         <span className="num font-mono text-[11px] text-ink-2">
           {sharks.length} shark{sharks.length === 1 ? '' : 's'} seen
@@ -137,7 +137,7 @@ export function TrackPanel({
         </span>
       </header>
       <ul className="scroll-quiet min-h-0 flex-1 overflow-y-auto">
-        {tracks.length === 0 && departed.length === 0 && <li className="px-5 py-6 text-[13px] text-ink-3">No contacts yet.</li>}
+        {tracks.length === 0 && departed.length === 0 && <li className="px-5 py-3 text-[13px] text-ink-3">No contacts yet.</li>}
         {tracks.map((t) => row(t))}
         {departed.length > 0 && (
           <li className="border-b border-rule bg-paper-2/60">

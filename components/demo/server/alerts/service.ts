@@ -178,7 +178,8 @@ export class AlertService {
     this.alerts.push(alert);
     this.publish(alert);
 
-    if (alert.recipients.length === 0) return; // advisory: logged in-app only
+    if (alert.recipients.length === 0) return; // no recipients (should not happen now
+    // that advisory also goes to lifeguards): nothing to send anywhere
     await this.sendTelegram(alert);
     this.armEscalation(alert);
   }

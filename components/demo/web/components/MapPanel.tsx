@@ -1,15 +1,26 @@
-// A small nautical chart of the patrol, drawn from the real OpenStreetMap coastline each clip
-// carries: buff land, white deep water, blue shoal along the shore (as charts shade shallow water),
-// an ink coastline, and our marks on top. No map tiles, so it works offline and shows no shops,
-// car parks or road names. The geometry lives in lib/chart.ts, where every clip's chart is tested.
+// A real satellite map of the patrol: Esri World Imagery tiles underneath, with the real
+// OpenStreetMap coastline, the drone camera footprint, swim zones and tracks on top.
+// The old flat chart (buff land, blue shoal, white water) is gone — it looked drawn, not real.
+// This needs internet for the tiles; without it Leaflet shows a dark background. The geometry
+// lives in lib/chart.ts, where every clip's chart is tested.
 
 import { useEffect, useMemo } from 'react';
-import { CircleMarker, MapContainer, Polygon, Polyline, ScaleControl, Tooltip, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { CircleMarker, MapContainer, Marker, Polygon, Polyline, ScaleControl, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import type { ClipInfo } from '../../shared/api.ts';
 import type { TrackSummary } from '../../shared/events.ts';
 import { footprint, offsetGeo, pixelToGeo, type CameraPose, type GeoPoint } from '../../shared/geo/project.ts';
 import { coastArea, coastFraming, formatDistance, nearestCoast, nearestOnLine } from '../lib/chart.ts';
 import { TONE_COLORS, toneFor } from '../lib/overlay.ts';
+
+// A small quadcopter seen from above, with a DRONE label under it, so the dot on the map
+// is recognisable without hovering. The icon is centred on the drone body (14px down the box).
+const droneIcon = L.divIcon({
+  className: 'drone-icon',
+  iconSize: [44, 44],
+  iconAnchor: [22, 14],
+  html: `<svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><g stroke="#04090f" stroke-width="1.6"><line x1="14" y1="14" x2="5" y2="5" /><line x1="14" y1="14" x2="23" y2="5" /><line x1="14" y1="14" x2="5" y2="23" /><line x1="14" y1="14" x2="23" y2="23" /></g><g fill="#eef4f6" stroke="#04090f" stroke-width="1.2"><circle cx="5" cy="5" r="3.4" /><circle cx="23" cy="5" r="3.4" /><circle cx="5" cy="23" r="3.4" /><circle cx="23" cy="23" r="3.4" /></g><circle cx="14" cy="14" r="4.2" fill="#04090f" stroke="#eef4f6" stroke-width="1.4" /><circle cx="14" cy="14" r="1.4" fill="#eef4f6" /></svg><div class="drone-label">DRONE</div>`,
+});
 
 const ll = (p: GeoPoint): [number, number] => [p.lat, p.lon];
 const INK = '#14212a';
@@ -93,17 +104,19 @@ export function MapPanel({
         zoomControl={false}
         attributionControl={false}
         className="h-full w-full"
-        style={{ background: 'var(--color-chart-deep)' }}
+        style={{ background: '#000812' }}
         scrollWheelZoom
       >
+        <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" attribution="Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics" maxZoom={19} />
+        {/* Schematic fills are now faint washes only, so the satellite photo shows through. */}
         {geometry.areas.map((a, i) => (
-          <Polygon key={`shoal-${i}`} positions={a.shoal.map(ll)} pathOptions={{ stroke: false, fillColor: SHOAL, fillOpacity: 1 }} interactive={false} />
+          <Polygon key={`shoal-${i}`} positions={a.shoal.map(ll)} pathOptions={{ stroke: false, fillColor: SHOAL, fillOpacity: 0.18 }} interactive={false} />
         ))}
         {geometry.areas.map((a, i) => (
-          <Polygon key={`land-${i}`} positions={a.land.map(ll)} pathOptions={{ stroke: false, fillColor: LAND, fillOpacity: 1 }} interactive={false} />
+          <Polygon key={`land-${i}`} positions={a.land.map(ll)} pathOptions={{ stroke: false, fillColor: LAND, fillOpacity: 0.15 }} interactive={false} />
         ))}
         {geometry.areas.map((a, i) => (
-          <Polyline key={`coast-${i}`} positions={a.coast.map(ll)} pathOptions={{ color: INK, weight: 1.25 }} interactive={false} />
+          <Polyline key={`coast-${i}`} positions={a.coast.map(ll)} pathOptions={{ color: '#ffffff', weight: 2, opacity: 0.9 }} interactive={false} />
         ))}
         <ScaleControl position="bottomleft" imperial={false} />
         <FitTo bounds={geometry.fitBounds} />
@@ -119,15 +132,11 @@ export function MapPanel({
             </Tooltip>
           </Polyline>
         )}
-        <Polygon positions={geometry.footprint} pathOptions={{ color: INK, weight: 1.5, fill: true, fillColor: INK, fillOpacity: 0.05, dashArray: '6 4' }}>
+        <Polygon positions={geometry.footprint} pathOptions={{ color: '#ffffff', weight: 1.5, fill: true, fillColor: '#ffffff', fillOpacity: 0.08, dashArray: '6 4' }}>
           <Tooltip sticky>Drone camera view</Tooltip>
         </Polygon>
-        {/* The drone itself, visible however far out the chart is zoomed. */}
-        <CircleMarker center={ll(scene.center)} radius={4} pathOptions={{ color: INK, weight: 1.5, fillColor: '#f7f8f4', fillOpacity: 1 }}>
-          <Tooltip direction="top" offset={[0, -5]}>
-            Drone
-          </Tooltip>
-        </CircleMarker>
+        {/* The drone itself, visible however far out the map is zoomed: icon + label, not just a dot. */}
+        <Marker position={ll(scene.center)} icon={droneIcon} interactive={false} />
         {marks.map(({ t, gone }) => {
           const tone = toneFor(t.kind, t.verdict);
           const color = tone === 'hidden' ? TONE_COLORS.neutral : TONE_COLORS[tone];
@@ -157,22 +166,17 @@ export function MapPanel({
         })}
       </MapContainer>
 
-      <div className="num pointer-events-none absolute left-3 top-2.5 z-[500] font-mono text-[10.5px] text-ink-2 [text-shadow:0_0_4px_var(--color-paper)]">
+      <div className="num pointer-events-none absolute left-3 top-2.5 z-[500] bg-[#04090f]/70 px-1.5 py-0.5 font-mono text-[10.5px] text-ink">
         {Math.abs(lat).toFixed(4)}°{lat >= 0 ? 'N' : 'S'} {Math.abs(lon).toFixed(4)}°{lon >= 0 ? 'E' : 'W'}
       </div>
-      <a
-        href="https://www.openstreetmap.org/copyright"
-        target="_blank"
-        rel="noreferrer"
-        className="absolute bottom-1 right-2 z-[500] text-[10px] text-ink-3 hover:text-ink"
-      >
-        Coastline © OpenStreetMap contributors
-      </a>
+      <div className="absolute bottom-1 right-2 z-[500] bg-[#04090f]/70 px-1.5 py-0.5 text-[10px] text-ink-2">
+        Tiles © <a href="https://www.esri.com" target="_blank" rel="noreferrer" className="hover:text-ink">Esri</a> · Coastline © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="hover:text-ink">OpenStreetMap contributors</a>
+      </div>
       <svg viewBox="0 0 40 40" className="pointer-events-none absolute right-2.5 top-2.5 z-[500] h-10 w-10" aria-label="North is up">
-        <circle cx="20" cy="20" r="13" fill="none" stroke={INK} strokeWidth="0.8" />
+        <circle cx="20" cy="20" r="13" fill="rgba(238,244,246,0.85)" stroke={INK} strokeWidth="0.8" />
         <path d="M20 5 L23.2 20 L20 18 L16.8 20 Z" fill={INK} />
         <path d="M20 35 L23.2 20 L20 22 L16.8 20 Z" fill="none" stroke={INK} strokeWidth="0.8" />
-        <text x="20" y="4.2" textAnchor="middle" fontSize="5.5" fontFamily="-apple-system, Inter, sans-serif" fontWeight="700" fill={INK}>
+        <text x="20" y="4.2" textAnchor="middle" fontSize="5.5" fontFamily="Inter, system-ui, -apple-system, 'Segoe UI', sans-serif" fontWeight="700" fill={INK}>
           N
         </text>
       </svg>

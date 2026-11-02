@@ -1,10 +1,15 @@
 {
-  "offset": 36455451,
+  "offset": 36455458,
   "subscribers": [
     {
       "chatId": 7185047338,
       "name": "Adam",
       "joinedAt": "2026-11-02T05:56:21.923Z"
+    },
+    {
+      "chatId": 9039136074,
+      "name": "Sema",
+      "joinedAt": "2026-11-02T06:05:08.757Z"
     }
   ]
 }
