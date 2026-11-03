@@ -35,7 +35,14 @@ export const api = {
   eventsUrl: (sessionId: string) => `/api/sessions/${sessionId}/events`,
   alertsStreamUrl: () => '/api/alerts/stream',
   acknowledge: (alertId: string, role: RecipientRole, by: string) =>
-    fetch(`/api/alerts/${alertId}/ack`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role, by }) }).then((r) => json<AlertJson>(r)),
+    fetch(`/api/alerts/${alertId}/ack`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role, by }) }).then((r) =>
+      json<AlertJson | { acknowledged: true; alertId: string; by: string }>(r),
+    ),
+  // Shared-store read for Vercel: returns the Telegram/webhook ack even
+  // when the instance that raised the alert is gone. { acknowledged: false }
+  // when there is no shared record (including when KV is not configured).
+  ackStatus: (alertId: string) =>
+    fetch(`/api/alerts/${alertId}/ack-status`).then((r) => json<{ acknowledged: boolean; alertId: string; by?: string; at?: string }>(r)),
   resolve: (alertId: string, by = 'Operator') =>
     fetch(`/api/alerts/${alertId}/resolve`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ by }) }).then((r) => json<AlertJson>(r)),
   capUrl: (alertId: string, cancel = false) => `/api/alerts/${alertId}/cap.xml${cancel ? '?msgType=Cancel' : ''}`,
