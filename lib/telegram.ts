@@ -122,7 +122,7 @@ export class TelegramChannel {
     type Update = {
       update_id: number;
       message?: { chat: { id: number; first_name?: string; title?: string; username?: string }; text?: string };
-      callback_query?: { id: string; data?: string; from: { first_name?: string; username?: string }; message?: { chat: { id: number }; message_id: number } };
+      callback_query?: { id: string; data?: string; from: { first_name?: string; last_name?: string; username?: string }; message?: { chat: { id: number }; message_id: number } };
     };
     const updates = await this.call<Update[]>('getUpdates', {
       offset: this.state.offset,
@@ -179,9 +179,11 @@ export class TelegramChannel {
     await this.call('sendMessage', { chat_id: chatId, text: 'SharkWatch alerts are off. Send /start to turn them back on.' });
   }
 
-  private async acknowledge(query: { id: string; data?: string; from: { first_name?: string; username?: string }; message?: { chat: { id: number }; message_id: number } }): Promise<void> {
+  private async acknowledge(query: { id: string; data?: string; from: { first_name?: string; last_name?: string; username?: string }; message?: { chat: { id: number }; message_id: number } }): Promise<void> {
     const alertId = query.data!.slice(ACK_PREFIX.length);
-    const by = query.from.first_name ?? query.from.username ?? 'someone';
+    // Use the full Telegram name, not just the first name, so the demo UI
+    // shows exactly which person acknowledged, not just "Adam".
+    const by = [query.from.first_name, query.from.last_name].filter(Boolean).join(' ') || query.from.username || 'someone';
     await this.call('answerCallbackQuery', { callback_query_id: query.id, text: 'Acknowledged. Thank you.' });
     if (query.message) {
       await this.call('editMessageReplyMarkup', {

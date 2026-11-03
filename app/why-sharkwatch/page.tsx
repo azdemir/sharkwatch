@@ -7,7 +7,9 @@ import Link from "next/link";
 // Pictures are Pexels stock photos (beach / surfers / lifeguard views),
 // NOT the homepage's hero-aerial / great-white / hammerhead / tiger set,
 // and NOT SharkWatch patrol frames, captions say so, so they are never
-// presented as detections. Numbers are ISAF (Florida Museum), see Sources.
+// presented as detections. Ocean-use numbers are Houston/ASBPA, NOAA,
+// IUCN and a 2024 coastal-population study, see Sources; the one
+// bite figure is ISAF (Florida Museum), see Sources.
 export default function WhySharkWatch() {
   useEffect(() => {
     const els = document.querySelectorAll(".why-reveal");
@@ -33,40 +35,29 @@ export default function WhySharkWatch() {
       <main className="why-main">
         <div className="why-reveal">
           <h1>Why <em>SharkWatch.</em></h1>
-          <p className="why-intro">From the sand, the water looks calm. What is below the surface is not visible to a swimmer, and often not visible to a lifeguard watching from shore. SharkWatch exists for that gap between a shark being in the water and anyone knowing it is there.</p>
+          <p className="why-intro">From the sand, the water looks calm, and millions of people enjoy it every year. SharkWatch exists to give lifeguards a clear, verified picture of what is below the surface, so the people already in the water can be looked after with confidence.</p>
         </div>
         <figure className="why-hero why-reveal">
           <img src="https://images.pexels.com/photos/3556117/pexels-photo-3556117.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="Beach and ocean seen from a drone" loading="lazy" />
           <figcaption>Stock photo (Pexels), a beach from above, not a SharkWatch patrol frame.</figcaption>
         </figure>
         <section className="why-reveal">
-          <h2>The numbers, first, honestly</h2>
-          <p>Shark bites are rare. That is the first thing the data says, and this page does not pretend otherwise. The International Shark Attack File (ISAF), kept by the Florida Museum of Natural History, counts an “unprovoked” bite as one that happens in the shark’s natural habitat with no human provocation, no spearfishing, feeding, or trying to free a shark from a net. On that definition:</p>
+          <h2>How many people are actually in the water</h2>
+          <p>Start with the scale, not the scare. Millions of people swim, surf, paddle, and play at the beach every year, in the United States and around the world. That is a lot of people sharing the same water, on the same busy days:</p>
           <div className="why-grid">
-            <div className="why-card"><div className="why-label">Worldwide · 2025</div><p className="why-big">65 <span>unprovoked bites</span></p><p>9 of them fatal. 12 people died in shark incidents in total that year, including provoked cases.</p></div>
-            <div className="why-card"><div className="why-label">United States · 2025</div><p className="why-big">25 <span>unprovoked bites</span></p><p>38% of the world total, with 1 fatality. Florida alone had 11, 44% of the US total, 17% of the world total.</p></div>
-            <div className="why-card"><div className="why-label">Worldwide · 2024</div><p className="why-big">47 <span>unprovoked bites</span></p><p>4 of them fatal, a low year. The US had 28 bites that year, 14 of them in Florida, 8 in Volusia County alone.</p></div>
-            <div className="why-card"><div className="why-label">5-year average · 2020–2024</div><p className="why-big">61 <span>bites a year</span></p><p>About 8 unprovoked fatalities a year on average. Year to year, the numbers swing a lot, 2024 was low, 2025 bounced back, which is normal, not a steady climb.</p></div>
-            <div className="why-card"><div className="why-label">The odds</div><p className="why-big">1 in 4,332,817</p><p>ISAF’s figure for a fatal shark encounter, using National Safety Council and CDC comparisons. For any one swimmer, the risk is extremely low, far below drowning, which ISAF notes is a much larger beach risk.</p></div>
-            <div className="why-card"><div className="why-label">Who gets bitten</div><p className="why-big">Surfers · ⅓</p><p>Surfers made up about a third of unprovoked bites in 2024. Murky, wave-churned water that draws bait fish and cuts visibility is a recurring factor, the shark often cannot tell a person from its usual prey.</p></div>
+            <div className="why-card"><div className="why-label">United States · each year</div><p className="why-big">180 <span>million beach visitors</span></p><p>About 180 million people visit US beaches each year, according to coastal researcher James R. Houston and the American Shore and Beach Preservation Association.</p></div>
+            <div className="why-card"><div className="why-label">United States · visits</div><p className="why-big">3.4 <span>billion beach visits a year</span></p><p>Those visitors make about 3.4 billion beach visits a year in total, far more than all US national parks combined.</p></div>
+            <div className="why-card"><div className="why-label">United States · how common</div><p className="why-big">47% <span>of Americans visit a beach each year</span></p><p>Nearly half of Americans visit a beach in a year, and 15% go monthly, in Houston’s surveys of beachgoing.</p></div>
+            <div className="why-card"><div className="why-label">United States · days on the coast · 2012</div><p className="why-big">1.2 <span>billion coastal recreation days</span></p><p>In NOAA’s National Ocean Recreation Expenditure Survey, more than 48 million American adults spent about 1.2 billion days along the coast in 2012.</p></div>
+            <div className="why-card"><div className="why-label">World · Mediterranean · 2024</div><p className="why-big">360 <span>million visitors</span></p><p>The Mediterranean region welcomed nearly 360 million visitors in 2024, according to the IUCN’s 2025 Sustainable Blue Tourism report.</p></div>
+            <div className="why-card"><div className="why-label">World · living close to the coast</div><p className="why-big">2 <span>billion+ people within 50 km of a shoreline</span></p><p>A 2024 study found more than 2 billion people lived within 50 km of a shoreline in 2018, over 29% of the world’s population at the time.</p></div>
           </div>
-          <p>So why build anything at all, if the risk is that low? Because “rare” is not the same as “harmless.” Each fatality is a life, each non-fatal bite can be a serious injury, and each incident closes a beach, shakes a community, and leaves the same question behind: was anyone watching that stretch of water, and did they know in time?</p>
+          <p>That is why a clear picture of the water matters, even though shark bites themselves are rare: the International Shark Attack File counted 65 unprovoked bites worldwide in 2025. With this many people in the water, the job is to watch a busy stretch clearly, and to give lifeguards a verified answer in seconds, not a guess.</p>
         </section>
         <figure className="why-photo why-reveal">
           <img src="https://images.pexels.com/photos/5232440/pexels-photo-5232440.jpeg?auto=compress&cs=tinysrgb&w=1200" alt="Surfers on a beach" loading="lazy" />
-          <figcaption>Stock photo (Pexels), the people most exposed are the ones already in the water.</figcaption>
+          <figcaption>Stock photo (Pexels), surfers enjoying the water.</figcaption>
         </figure>
-        <section className="why-reveal">
-          <h2>The real problem is not the number. It is the warning time.</h2>
-          <div className="why-grid">
-            <div className="why-card"><div className="why-label">You cannot see it from shore</div><p>A shark a few metres below the surface, in murky water or at dawn and dusk, is invisible to a swimmer and hard to spot from a tower. Sightings happen far more often than bites, but a sighting only helps if someone sees it, believes it, and acts on it.</p></div>
-            <div className="why-card"><div className="why-label">A human eye cannot watch every frame</div><p>Drone patrols already fly, but a pilot watching a live feed has to notice a shape, judge what it is, and pass the message on, while flying. Attention, fatigue, and coverage gaps before and after lifeguard hours all cut into that chain.</p></div>
-            <div className="why-card"><div className="why-label">The message chain is slow</div><p>Today a sighting typically travels person to person, pilot to park staff to lifeguard to beach closure, with each step adding minutes. In that time, swimmers are still in the water, and the shark may have moved on or come closer.</p></div>
-            <div className="why-card"><div className="why-label">Not every shape is a shark</div><p>Dolphins, seals, rays, kelp, and shadows all look like sharks from above. Alert on every shape and beaches close for nothing; ignore shapes and the real one is missed. The hard part is not seeing something, it is knowing what it is.</p></div>
-            <div className="why-card"><div className="why-label">More people, same water</div><p>Beach use, surfing, and open-water swimming keep growing, and sharks and bait fish still come close to shore. More overlap means more chances for the rare encounter to happen on a busy day, in front of a crowd.</p></div>
-            <div className="why-card"><div className="why-label">Awareness, not fear</div><p>Most beachgoers have no real-time picture of what is in the water near them. Better awareness, clear, verified, and calm, lets people and lifeguards make better decisions than either panic or ignorance does.</p></div>
-          </div>
-        </section>
         <div className="why-photos why-reveal">
           <figure className="why-photo"><img src="https://images.pexels.com/photos/2060301/pexels-photo-2060301.jpeg?auto=compress&cs=tinysrgb&w=1200" alt="Beach and lifeguard view" loading="lazy" /><figcaption>Stock photo (Pexels), the view a lifeguard actually has.</figcaption></figure>
           <figure className="why-photo"><img src="https://images.pexels.com/photos/20470023/pexels-photo-20470023/free-photo-of-drone-shot-of-beach-along-ocean.jpeg?auto=compress&cs=tinysrgb&w=1200" alt="Drone shot of a beach along the ocean" loading="lazy" /><figcaption>Stock photo (Pexels), the view a drone adds.</figcaption></figure>
@@ -84,7 +75,7 @@ export default function WhySharkWatch() {
         </section>
         <section className="why-reveal">
           <h2>Sources</h2>
-          <p>International Shark Attack File (ISAF), Florida Museum of Natural History, annual summaries for 2024 and 2025, including the 2020–2024 five-year averages and the fatality-odds comparison drawn from National Safety Council and CDC data. Figures are for unprovoked bites unless stated otherwise; provoked bites (spearfishing, feeding, freeing a shark) are counted separately by ISAF. If ISAF revises a year, these numbers should be updated to match. Photos on this page are Pexels stock photos, not SharkWatch patrol footage.</p>
+          <p>United States: James R. Houston and the American Shore and Beach Preservation Association, about 180 million beach visitors, about 3.4 billion beach visits a year, 47% of Americans visiting a beach each year; NOAA National Ocean Recreation Expenditure Survey, more than 48 million adults and about 1.2 billion coastal recreation days in 2012. World: IUCN, Sustainable Blue Tourism in the Mediterranean (2025), nearly 360 million visitors in 2024; a 2024 coastal-population study, more than 2 billion people within 50 km of a shoreline in 2018. There is no single official global beach-visitor count, so this page does not invent one. The one bite figure is the International Shark Attack File (ISAF), Florida Museum of Natural History, 65 unprovoked bites worldwide in 2025. Photos on this page are Pexels stock photos, not SharkWatch patrol footage.</p>
         </section>
         <p className="why-cta why-reveal">
           <Link href="/demo" className="why-btn solid">Try the Demo →</Link>

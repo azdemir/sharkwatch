@@ -34,10 +34,22 @@ export function useSession() {
     dispatch({ type: 'reset' });
   }, [close]);
 
-  useEffect(() => {
-    if (state.status === 'ended') close();
-  }, [state.status, close]);
+  // Apply an alert returned by an ack/resolve call straight away, instead of
+  // waiting for the live alert stream to echo it back (and silently doing
+  // nothing if that echo is missed). The stream still updates it later;
+  // the version check in the reducer drops the duplicate.
+  const applyAlert = useCallback((alert: AlertJson) => {
+    dispatch({ type: 'alert', alert });
+  }, []);
 
+  // Do NOT close the patrol stream when the patrol ends. Acknowledgements
+  // (especially Telegram taps, which usually come after the short Replay
+  // patrol has already ended) are published on this same bus, so closing
+  // here left only the server-wide alert stream to deliver them — and if
+  // that stream missed, the UI never showed the ack. Keeping this stream
+  // open costs nothing after the end: no more frames arrive, only alert
+  // updates. It is still closed when a new patrol connects, on reset, and
+  // on unmount.
   useEffect(() => close, [close]);
 
   // Alerts outlive the patrol that raised them (acknowledgements, escalations, the all-clear), so
@@ -49,5 +61,5 @@ export function useSession() {
     return () => es.close();
   }, [state.sessionId]);
 
-  return { state, connect, reset };
+  return { state, connect, reset, applyAlert };
 }

@@ -1,6 +1,6 @@
 // Integrated demo sessions (Replay + Live, one server).
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
 import { getTelegramChannel } from '@/lib/telegram-server';
 import { CONFIRM_FRAMES, type SessionEvent, type TrackSummary } from '../shared/events.ts';
 import type { ClipManifest } from '../shared/manifest.ts';
@@ -58,7 +58,32 @@ function demoTelegramChannel(): AlertChannel | undefined {
   const gg = globalThis as unknown as { __sharkwatchDemoTelegramAck?: boolean };
   if (!gg.__sharkwatchDemoTelegramAck) {
     gg.__sharkwatchDemoTelegramAck = true;
-    channel.onAcknowledge(({ alertId, by }) => { alertHub.acknowledge(alertId, 'lifeguards', by); });
+    channel.onAcknowledge(({ alertId, by }) => {
+      // Hub first. If that misses — e.g. the hub was reset by a reload —
+      // fall back to the session that actually holds this alert. That
+      // service publishes straight onto its patrol bus, which the demo UI
+      // listens to even after the patrol ends, so the ack still reaches
+      // the UI instead of vanishing silently.
+      const hubAcked = alertHub.acknowledge(alertId, 'lifeguards', by);
+      let fallbackSession: string | undefined;
+      if (!hubAcked) {
+        for (const session of sessions.values()) {
+          if (session.alerts.acknowledge(alertId, 'lifeguards', by)) { fallbackSession = session.id; break; }
+        }
+      }
+      // Diagnostic log I can read from the Mac after a tap, so a missing
+      // UI update stops being a guess: if no line appears here, the tap
+      // never reached this server at all (old server still polling, or
+      // another process ate it); if a line appears with neither ack, the
+      // alert is not in this server's sessions.
+      try {
+        const logPath = join(DATA_DIR, '.cache', 'telegram-acks.jsonl');
+        mkdirSync(dirname(logPath), { recursive: true });
+        appendFileSync(logPath, `${JSON.stringify({ at: new Date().toISOString(), alertId, by, hubAcked: Boolean(hubAcked), fallbackSession: fallbackSession ?? null })}\n`);
+      } catch {
+        // Logging must never break the ack itself.
+      }
+    });
   }
   return { broadcast: async (alert) => (await channel.broadcast(alert)).size };
 }

@@ -31,4 +31,14 @@ export class AlertHub {
     return this.serviceFor(alertId)?.resolve(alertId, by) ?? Promise.resolve(undefined);
   }
 }
-export const alertHub = new AlertHub();
+// One shared hub for the whole server process, kept on globalThis like the
+// session map and the Telegram channel. A plain module-level `new AlertHub()`
+// does not survive a dev-server reload the way those do: after a reload the
+// ack route and the alert stream can end up with a fresh, empty hub while
+// the running session's AlertService still publishes to the old one. That
+// is exactly "Unknown alert" from the UI button and a Telegram ack that
+// never reaches the UI, even though the patrol's own event stream still
+// shows the alert itself.
+const g = globalThis as unknown as { __sharkwatchAlertHub?: AlertHub };
+if (!g.__sharkwatchAlertHub) g.__sharkwatchAlertHub = new AlertHub();
+export const alertHub = g.__sharkwatchAlertHub;

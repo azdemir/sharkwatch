@@ -21,13 +21,11 @@ export function App() {
   const [clips, setClips] = useState<ClipInfo[]>([]);
   const [recordings, setRecordings] = useState<RecordingInfo[]>([]);
   const [clipId, setClipId] = useState<string>();
-  const [mode, setMode] = useState<Mode>('replay');
-  const [liveWarning, setLiveWarning] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string>();
   const [error, setError] = useState<string>();
   const [showLost, setShowLost] = useState(false);
   const [telegram, setTelegram] = useState<TelegramInfo>();
-  const { state, connect, reset } = useSession();
+  const { state, connect, reset, applyAlert } = useSession();
   /* Uploaded footage: played back in the visitor's own browser only (an
    * object URL, the file is never sent to the server) until the visitor
    * presses Run Live detection, which sends it to /api/uploads and then
@@ -110,7 +108,6 @@ export function App() {
         const withRecording = new Set(r.map((x) => x.clipId));
         const preferred = c.find((x) => x.id === 'clip-g-capistrano' && withRecording.has(x.id)) ?? c.find((x) => !x.demo && withRecording.has(x.id)) ?? c[0];
         setClipId(preferred?.id);
-        if (!withRecording.size && h.live) setMode('live');
       })
       .catch((e: Error) => setError(`Can't reach the SharkWatch server: ${e.message}`));
     api.telegram().then(setTelegram).catch(() => setTelegram({ enabled: false }));
@@ -118,19 +115,28 @@ export function App() {
 
   const clip = uploadClip ?? clips.find((c) => c.id === clipId);
   const hasRecording = recordings.some((r) => r.clipId === clipId);
+  /* No Replay/Live toggle any more: Start patrol picks the mode itself.
+   * A recorded clip replays (free, no new calls); a clip with no
+   * recording runs Live when this server can run it, otherwise Start
+   * stays disabled, same as Replay-with-no-recording did before. */
+  const mode: Mode = uploadClip ? 'live' : hasRecording ? 'replay' : health?.live ? 'live' : 'replay';
   const running = state.status === 'connecting' || state.status === 'running';
-  const canStart = !uploadClip && Boolean(clip) && (mode === 'replay' ? hasRecording : Boolean(health?.live));
+  const canStart = !uploadClip && Boolean(clip) && (hasRecording || Boolean(health?.live));
   const tracks = useMemo(() => visibleTracks(state), [state]);
   const departed = useMemo(() => departedTracks(state), [state]);
   const allTracks = [...tracks, ...departed];
   const detection = (selectedId ? allTracks.find((t) => t.id === selectedId) : undefined) ?? allTracks.find((t) => t.verdict === 'shark') ?? allTracks.find((t) => t.kind === 'animal');
   const alerts = [...state.alerts.values()].reverse();
   const currentAlert = alerts.find((a) => a.status !== 'resolved') ?? alerts[0];
+  // The demo page acts as lifeguards. Once lifeguards have acknowledged — in
+  // the UI or in Telegram — the Acknowledge button must go away: showing it
+  // again invites a second click that changes nothing, which reads as broken.
+  const lifeguardAck = currentAlert?.recipients.find((r) => r.role === 'lifeguards');
+  const lifeguardAcknowledged = lifeguardAck?.status === 'acknowledged';
 
   async function start() {
     if (!clip) return;
     setError(undefined);
-    setLiveWarning(null);
     setSelectedId(undefined);
     try {
       let passcode: string | undefined;
@@ -150,7 +156,6 @@ export function App() {
   }
 
   function chooseClip(id: string) {
-    setLiveWarning(null);
     reset();
     setSelectedId(undefined);
     setUploadClip(null);
@@ -203,7 +208,7 @@ export function App() {
         )}
         {health && health.uploads !== false && health.live && (
           <section className={`${card} px-5 py-4`}>
-            <p className="text-[13px] leading-[1.6] text-ink-2"><b className="text-ink">Local demo, Replay and Live.</b> Replay is free and makes no new API calls. Live runs SAM 3.1 + Muse Spark on new footage and uses paid Meta calls.</p>
+            <p className="text-[13px] leading-[1.6] text-ink-2"><b className="text-ink">Local demo, Replay.</b> Replay is free and makes no new API calls.</p>
           </section>
         )}
         {showUpload && (
@@ -312,10 +317,10 @@ export function App() {
             because someone opened the page. */}
         {!running && state.status !== 'running' && clip && (
           <section className={`${card} px-5 py-4`}>
-            <p className="text-[14px] leading-[1.6] text-ink-2"><b className="text-ink">Start here: {clip.title} · {clip.durationS.toFixed(1)} seconds · {mode === 'live' ? 'Live, paid Meta calls' : 'Replay, free, no key'}.</b> Press Start patrol below to run it. In Replay, agencies and locations are simulated.</p>
+            <p className="text-[14px] leading-[1.6] text-ink-2"><b className="text-ink">Start here: {clip.title} · {clip.durationS.toFixed(1)} seconds · {mode === 'live' ? 'Live, paid Meta calls' : 'Replay, free, no key'}.</b> Press Start patrol below to run it. {mode === 'live' ? 'Live runs SAM 3.1 + Muse Spark on this footage.' : 'In Replay, agencies and locations are simulated.'}</p>
           </section>
         )}
-        {/* Controls: exactly Design 3's strip, .controls / .seg / .primary in demo.css. */}
+        {/* Controls: Design 3's strip, .controls / .primary in demo.css. No mode toggle: Start patrol picks Replay or Live itself. */}
         <section className={`${card} controls`}> 
           <span className={`status-pill${running ? ' on' : ''}`}><i />{statusText}</span>
           <select value={clipId ?? ''} onChange={(e) => chooseClip(e.target.value)} disabled={running} aria-label="Patrol footage">
@@ -330,32 +335,12 @@ export function App() {
               ) : null;
             })}
           </select>
-          <div className="seg" role="radiogroup" aria-label="Mode">
-            {(['replay', 'live'] as const).map((m) => (
-              <button key={m} type="button" role="radio" aria-checked={mode === m} disabled={running || !health} title={m === 'live' && health && !health.live ? (health.uploads === false ? 'Live does not run on Vercel, click for the warning' : 'Live needs a Meta key, click for the warning') : undefined} onClick={() => {
-                if (m === 'live' && health && !health.live) {
-                  setLiveWarning(health.uploads === false ? 'No live data at this moment, try Replay instead. Live does not run on Vercel; run locally with npm run dev and a Meta key for Live.' : 'No live data at this moment, try Replay instead. Live needs a Meta key on this server: add MODEL_API_KEY (or META_KEY) to .env, then restart.');
-                  setMode('replay');
-                } else {
-                  setLiveWarning(null);
-                  setMode(m);
-                }
-              }} className={mode === m ? 'on' : ''}>{m}</button>
-            ))}
-          </div>
           {running ? (
             <button type="button" onClick={stop} className="primary stop">Stop patrol</button>
           ) : (
             <button type="button" onClick={start} disabled={!canStart} title={uploadClip ? 'Your footage runs from its preview card, press Run Live detection there' : mode === 'replay' && !hasRecording ? 'No recording for this clip yet' : undefined} className="primary">{state.status === 'ended' ? 'Run again' : 'Start patrol'}</button>
           )}
         </section>
-
-        {liveWarning && (
-          <div className="flex flex-wrap items-center gap-3 rounded-none border border-rule bg-sheet px-5 py-3 text-[13px] leading-[1.6] text-ink-2">
-            <span>⚠ {liveWarning}</span>
-            <button type="button" className="alert-btn light" onClick={() => { setLiveWarning(null); setMode('replay'); }}>Use Replay</button>
-          </div>
-        )}
 
         {error && <div className="rounded-none border border-red/40 bg-red/10 px-5 py-3 text-[13px] text-red">{error}</div>}
 
@@ -399,18 +384,23 @@ export function App() {
                 <p className="mt-1 text-[13px] leading-[1.6] text-ink-2">{currentAlert.summary}</p>
                 <ul className="mt-3 space-y-1.5 text-[13px]">
                   {currentAlert.recipients.map((r) => (
-                    <li key={r.role} className="flex items-baseline justify-between gap-3"><span>{r.name.replace(' (simulated)', '')} <span className="text-ink-3">· {r.channels.join(' + ')}</span></span><span className="num shrink-0 font-mono text-[12px] text-ink-2">{r.status === 'acknowledged' ? `✓ ${r.acknowledgedBy ?? 'acknowledged'}` : r.status}</span></li>
+                    <li key={r.role} className="flex items-baseline justify-between gap-3"><span>{r.name.replace(' (simulated)', '')} <span className="text-ink-3">· {r.channels.join(' + ')}</span></span><span className="num shrink-0 font-mono text-[12px] text-ink-2">{r.status === 'acknowledged' ? `✓ ${r.acknowledgedBy ?? 'Lifeguards'} acknowledged` : r.status}</span></li>
                   ))}
                 </ul>
                 {currentAlert.telegramDelivered ? <p className="mt-2 text-[12px] text-ink-3">On {currentAlert.telegramDelivered} phone{currentAlert.telegramDelivered === 1 ? '' : 's'} via Telegram</p> : null}
                 {/* All three actions in the Run Again button's style (.alert-btn in
                     demo.css, copied from .controls .primary): same 48px height,
                     same padding and text, so they line up exactly like it. */}
+                {lifeguardAcknowledged && (
+                  <p className="mt-4 text-[14px] font-[600] text-green">✓ {lifeguardAck?.acknowledgedBy ?? 'Lifeguards'} acknowledged</p>
+                )}
                 <div className="alert-actions">
                   {currentAlert.status !== 'resolved' && currentAlert.recipients.length > 0 && (
                     <>
-                      <button type="button" onClick={() => void api.acknowledge(currentAlert.id, 'lifeguards', 'Operator').catch(() => {})} className="alert-btn light">Acknowledge</button>
-                      <button type="button" onClick={() => void api.resolve(currentAlert.id).catch(() => {})} className="alert-btn green">All clear</button>
+                      {!lifeguardAcknowledged && (
+                        <button type="button" onClick={async () => { setError(undefined); try { applyAlert(await api.acknowledge(currentAlert.id, 'lifeguards', 'Operator')); } catch (e) { setError((e as Error).message); } }} className="alert-btn light">Acknowledge</button>
+                      )}
+                      <button type="button" onClick={async () => { setError(undefined); try { applyAlert(await api.resolve(currentAlert.id)); } catch (e) { setError((e as Error).message); } }} className="alert-btn green">All clear</button>
                     </>
                   )}
                   <a href={api.capUrl(currentAlert.id)} target="_blank" rel="noreferrer" className="alert-btn outline">CAP XML</a>

@@ -96,7 +96,7 @@ body {
 }
 
 /* Control strip, copied from Design 3 — plain CSS, not Tailwind utilities, so the
- * segmented pill and the primary button cannot drift apart again. */
+ * footage select and the primary button cannot drift apart again. */
 .controls {
   padding: 16px 20px;
   display: flex;
@@ -138,38 +138,6 @@ body {
   background-repeat: no-repeat;
   background-position: right 14px center;
   background-size: 10px;
-}
-.controls .seg {
-  display: flex;
-  box-sizing: border-box;
-  border: 1px solid var(--color-rule-strong);
-  padding: 4px;
-  background: var(--color-sheet);
-  height: 44px;
-  align-items: stretch;
-}
-.controls .seg button {
-  height: 36px;
-  box-sizing: border-box;
-  padding: 0 16px;
-  background: transparent;
-  border: 0;
-  color: var(--color-ink-2);
-  font-size: 13px;
-  font-family: var(--font-sans);
-  text-transform: capitalize;
-  white-space: nowrap;
-  cursor: pointer;
-}
-.controls .seg button.on {
-  background: var(--color-ink);
-  color: #04090f;
-  font-weight: 700;
-}
-.controls .seg button:disabled {
-  cursor: not-allowed;
-  color: var(--color-ink-3);
-  opacity: 0.6;
 }
 .controls .primary {
   margin-left: auto;
@@ -353,13 +321,11 @@ body {
 /* Mobile: the demo grid already stacks (grid-cols-1, lg:12), but the control
  * strip did not — the footage select had a 240px minimum and the Start button
  * was pushed right by margin-left: auto, so on a phone they crowded instead
- * of stacking. On small screens the select, mode switch and Start button all
+ * of stacking. On small screens the select and Start button all
  * go full-width, and the alert buttons share the row two-up. */
 @media (max-width: 640px) {
   .controls { padding: 12px 16px; }
   .controls select { min-width: 0; flex: 1 1 100%; }
-  .controls .seg { width: 100%; }
-  .controls .seg button { flex: 1; }
   .controls .primary { margin-left: 0; width: 100%; }
   .alert-btn { flex: 1 1 40%; padding: 0 16px; }
   .card-head { padding: 12px 16px; }
