@@ -98,6 +98,60 @@ every page) links back to `/`.
 
 Demo agencies in Replay are simulated. No real agency is contacted.
 
+### Telegram and acknowledgement
+
+Telegram is how a confirmed alert reaches a phone, not just the demo
+page. The bot is **@SharkDetectionBot** (https://t.me/SharkDetectionBot).
+
+- **Subscribe / unsubscribe:** send `/start` to the bot to subscribe,
+  `/stop` to unsubscribe. `GET /api/telegram` reports whether the bot
+  is configured, the bot username, and how many subscribers there are.
+- **What is sent:** when an alert is raised, it goes to console and to
+  Telegram at the same time. The demo shows “On N phones via Telegram”
+  when it has been delivered there. A test broadcast can be sent with
+  `POST /api/telegram`.
+- **How Telegram works, locally vs on Vercel:** locally, the server
+  long-polls Telegram in the same process as the demo. On Vercel there
+  is no long-running process, so Telegram is handled by a webhook
+  (`/api/telegram/webhook`, set up once via
+  `/api/telegram/set-webhook`), and acks, subscribers, and All clear
+  records are kept in a shared Supabase store
+  (`sharkwatch_acks`, `sharkwatch_subscribers`, `sharkwatch_resolved` —
+  see `supabase/ack-store.sql`), not in any one instance's memory.
+  The demo polls `GET /api/alerts/[id]/ack-status` every 4 seconds, so
+  a Telegram ack still shows in the UI even if the instance that raised
+  the alert is long gone.
+
+Who acknowledged an alert is shown by name, and the name is never
+renamed by SharkWatch:
+
+- **Acknowledged by a Telegram user:** tap Acknowledge in the Telegram
+  message. The Telegram button flips to “✅ Acknowledged by {name}”,
+  and the demo shows “✓ {name} acknowledged”. The name is the
+  Telegram user's full name (first + last, falling back to their
+  username). A tap by Aziz shows as Aziz, not as anyone else.
+- **Acknowledged by an operator, on the demo page:** click Acknowledge
+  in `/demo`. The demo page has no name input, so this is recorded as
+  **Operator**, and the demo shows “✓ Operator acknowledged”.
+- **Acknowledged by an operator, in the authority console:** open
+  `/console?role=lifeguards` (or `beach_management` /
+  `coastal_security`), type a name in the “Signing as” field, and click
+  Acknowledge. That name is used (saved in the browser's local storage
+  for next time); if the field is blank, the agency name for that role
+  is used instead.
+- **All clear:** click All clear in `/demo` (or in the console). This
+  resolves the alert. It is recorded as given by Operator by default,
+  and the console shows “All clear, given by {name} at {time}”. On
+  Vercel, All clear uses the same shared store as Acknowledge, so it
+  does not fail with “Unknown alert” just because a different instance
+  handles the request — unless no shared store is configured at all,
+  in which case that error is real.
+
+A Telegram ack counts as the lifeguards recipient acknowledging: it
+marks that recipient acknowledged in the demo, and hides the demo
+Acknowledge button for that alert. Acknowledgement does not resolve an
+alert — All clear is still needed for that.
+
 ### Install, honestly
 
 SharkWatch is software that runs on the ground. The drone just records
@@ -169,7 +223,7 @@ cost of the original Live run. There are 7 recorded patrols in Replay.
 | Video | ffmpeg-static + ffprobe-static (chunking, probing), sharp (evidence crops), qrcode (Telegram QR) |
 | Tests | Playwright (`npm run test:e2e`) |
 | Hosting | Vercel (https://sharkwatch.vercel.app). One server only — no separate Vite or demo server. |
-| Alerts | Telegram Bot API (long-polling, see `lib/telegram-server.ts`), CAP XML |
+| Alerts | Telegram Bot API (long-polling locally, webhook on Vercel, see `lib/telegram-server.ts` and `lib/ack-store.ts`), CAP XML |
 
 Project layout (the parts that matter):
 
@@ -222,7 +276,7 @@ runtime.
 - `POST /api/detect` — detection endpoint
 - `GET /api/health` — health, including `live` (false on Vercel, even with a key set) and `uploads` (false on Vercel) and Telegram status
 - `GET /api/telegram` — Telegram status (configured, bot username, subscribers); `POST` sends a test broadcast
-- Demo APIs: `GET /api/clips`, `GET /api/recordings`, `GET/POST /api/sessions`, `GET /api/sessions/[id]/events` (SSE), `POST /api/sessions/[id]/stop`, `GET /api/sessions/[id]/evidence/[file]`, `GET /api/alerts`, `GET /api/alerts/stream` (SSE), `POST /api/alerts/[id]/ack`, `POST /api/alerts/[id]/resolve`, `GET /api/alerts/[id]/cap.xml`
+- Demo APIs: `GET /api/clips`, `GET /api/recordings`, `GET/POST /api/sessions`, `GET /api/sessions/[id]/events` (SSE), `POST /api/sessions/[id]/stop`, `GET /api/sessions/[id]/evidence/[file]`, `GET /api/alerts`, `GET /api/alerts/stream` (SSE), `POST /api/alerts/[id]/ack`, `GET /api/alerts/[id]/ack-status` (acknowledged + resolved, from the shared store), `POST /api/alerts/[id]/resolve`, `GET /api/alerts/[id]/cap.xml`
 - `POST /api/uploads` — local only; returns a plain local-only message (501) on Vercel
 - `GET /media/[...path]` — playback (playback.mp4 only)
 
