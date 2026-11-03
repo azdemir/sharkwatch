@@ -42,9 +42,11 @@ export const api = {
   // when the instance that raised the alert is gone. { acknowledged: false }
   // when there is no shared record (including when KV is not configured).
   ackStatus: (alertId: string) =>
-    fetch(`/api/alerts/${alertId}/ack-status`).then((r) => json<{ acknowledged: boolean; alertId: string; by?: string; at?: string }>(r)),
+    fetch(`/api/alerts/${alertId}/ack-status`).then((r) => json<{ acknowledged: boolean; alertId: string; by?: string; at?: string; resolved: boolean; resolvedBy?: string; resolvedAt?: string }>(r)),
   resolve: (alertId: string, by = 'Operator') =>
-    fetch(`/api/alerts/${alertId}/resolve`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ by }) }).then((r) => json<AlertJson>(r)),
+    fetch(`/api/alerts/${alertId}/resolve`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ by }) }).then((r) =>
+      json<AlertJson | { resolved: true; alertId: string; by: string }>(r),
+    ),
   capUrl: (alertId: string, cancel = false) => `/api/alerts/${alertId}/cap.xml${cancel ? '?msgType=Cancel' : ''}`,
   telegram: () => fetch('/api/telegram').then((r) => json<TelegramInfo>(r)),
   evidenceUrl: (sessionId: string, evidencePath: string) => `/api/sessions/${sessionId}/${evidencePath}`,

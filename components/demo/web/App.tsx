@@ -142,12 +142,22 @@ export function App() {
   // local without KV this just returns acknowledged: false and does
   // nothing, so the normal stream path is unchanged.
   useEffect(() => {
-    if (!currentAlert || currentAlert.status === 'resolved' || lifeguardAcknowledged) return;
+    if (!currentAlert || currentAlert.status === 'resolved') return;
     const alert = currentAlert;
     const tick = async () => {
       try {
         const status = await api.ackStatus(alert.id);
-        if (!status.acknowledged || !status.by) return;
+        if (status.resolved) {
+          applyAlert({
+            ...alert,
+            version: alert.version + 1,
+            status: 'resolved' as const,
+            resolvedBy: status.resolvedBy ?? 'Operator',
+            resolvedAt: status.resolvedAt ?? new Date().toISOString(),
+          });
+          return;
+        }
+        if (lifeguardAcknowledged || !status.acknowledged || !status.by) return;
         applyAlert({
           ...alert,
           version: alert.version + 1,
@@ -431,7 +441,7 @@ export function App() {
                       {!lifeguardAcknowledged && (
                         <button type="button" onClick={async () => { setError(undefined); try { const res = await api.acknowledge(currentAlert.id, 'lifeguards', 'Operator'); if ('id' in res) { applyAlert(res); } else if (res.acknowledged) { applyAlert({ ...currentAlert, version: currentAlert.version + 1, status: 'acknowledged' as const, recipients: currentAlert.recipients.map((r) => (r.role === 'lifeguards' ? { ...r, status: 'acknowledged' as const, acknowledgedBy: res.by } : r)) }); } } catch (e) { setError((e as Error).message); } }} className="alert-btn light">Acknowledge</button>
                       )}
-                      <button type="button" onClick={async () => { setError(undefined); try { applyAlert(await api.resolve(currentAlert.id)); } catch (e) { setError((e as Error).message); } }} className="alert-btn green">All clear</button>
+                      <button type="button" onClick={async () => { setError(undefined); try { const res = await api.resolve(currentAlert.id); if ('id' in res) { applyAlert(res); } else if (res.resolved) { applyAlert({ ...currentAlert, version: currentAlert.version + 1, status: 'resolved' as const, resolvedBy: res.by, resolvedAt: new Date().toISOString() }); } } catch (e) { setError((e as Error).message); } }} className="alert-btn green">All clear</button>
                     </>
                   )}
                   <a href={api.capUrl(currentAlert.id)} target="_blank" rel="noreferrer" className="alert-btn outline">CAP XML</a>

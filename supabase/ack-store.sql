@@ -32,3 +32,9 @@ create table if not exists public.sharkwatch_subscribers (
   joined_at timestamptz not null default now(),
   via text
 );
+
+create table if not exists public.sharkwatch_resolved (
+  alert_id text primary key,
+  "by" text not null,
+  "at" timestamptz not null default now()
+);

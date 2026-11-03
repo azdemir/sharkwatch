@@ -8,7 +8,8 @@
 //
 // Store priority (first configured store wins, per process):
 //   1. Supabase (Postgres, via its REST / PostgREST API, plain fetch,
-//      no new dependency). Tables: sharkwatch_acks, sharkwatch_subscribers.
+//      no new dependency). Tables: sharkwatch_acks, sharkwatch_subscribers,
+//      sharkwatch_resolved (All clear, same pattern as acks).
 //      See supabase/ack-store.sql — run it once in the Supabase SQL Editor
 //      before this store can record anything.
 //   2. Vercel KV (Upstash Redis REST) — the original store, kept as a
@@ -32,6 +33,9 @@ export interface SharedAck {
   by: string;
   at: string;
 }
+
+// Resolved state uses the same shape as an ack: who cleared it, and when.
+export type SharedResolved = SharedAck;
 
 export interface SharedSubscriber {
   chatId: number;
@@ -98,6 +102,49 @@ async function supabaseSaveAck(alertId: string, by: string): Promise<boolean> {
   if (!cfg) return false;
   try {
     const res = await fetch(`${cfg.url}/rest/v1/sharkwatch_acks?on_conflict=alert_id`, {
+      method: 'POST',
+      headers: {
+        ...supabaseHeaders(cfg),
+        Prefer: 'resolution=merge-duplicates,return=representation',
+      },
+      body: JSON.stringify({
+        alert_id: alertId,
+        by,
+        at: new Date().toISOString(),
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function supabaseGetResolved(alertId: string): Promise<SharedResolved | null> {
+  const cfg = supabaseConfig();
+  if (!cfg) return null;
+  try {
+    const res = await fetch(
+      `${cfg.url}/rest/v1/sharkwatch_resolved?alert_id=eq.${encodeURIComponent(alertId)}&select=by,at`,
+      { headers: supabaseHeaders(cfg), cache: 'no-store' },
+    );
+    if (!res.ok) return null;
+    const rows = (await res.json()) as Array<{ by?: unknown; at?: unknown }>;
+    const row = Array.isArray(rows) ? rows[0] : undefined;
+    if (!row || typeof row.by !== 'string' || !row.by) return null;
+    return {
+      by: row.by,
+      at: typeof row.at === 'string' && row.at ? row.at : new Date().toISOString(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function supabaseSaveResolved(alertId: string, by: string): Promise<boolean> {
+  const cfg = supabaseConfig();
+  if (!cfg) return false;
+  try {
+    const res = await fetch(`${cfg.url}/rest/v1/sharkwatch_resolved?on_conflict=alert_id`, {
       method: 'POST',
       headers: {
         ...supabaseHeaders(cfg),
@@ -256,6 +303,21 @@ async function kvSaveAck(alertId: string, by: string): Promise<boolean> {
   return kvSet(`sw:ack:${alertId}`, { by, at: new Date().toISOString() });
 }
 
+async function kvGetResolved(alertId: string): Promise<SharedResolved | null> {
+  const raw = await kvGet(`sw:resolved:${alertId}`);
+  if (!raw || typeof raw !== 'object') return null;
+  const rec = raw as { by?: unknown; at?: unknown };
+  if (typeof rec.by !== 'string') return null;
+  return {
+    by: rec.by,
+    at: typeof rec.at === 'string' ? rec.at : new Date().toISOString(),
+  };
+}
+
+async function kvSaveResolved(alertId: string, by: string): Promise<boolean> {
+  return kvSet(`sw:resolved:${alertId}`, { by, at: new Date().toISOString() });
+}
+
 async function kvGetSubscribers(): Promise<SharedSubscriber[] | null> {
   const raw = await kvGet('sw:subscribers');
   if (raw == null) return null;
@@ -290,6 +352,16 @@ export async function getSharedAck(alertId: string): Promise<SharedAck | null> {
 export async function saveSharedAck(alertId: string, by: string): Promise<boolean> {
   if (supabaseConfig() !== null) return supabaseSaveAck(alertId, by);
   return kvSaveAck(alertId, by);
+}
+
+export async function getSharedResolved(alertId: string): Promise<SharedResolved | null> {
+  if (supabaseConfig() !== null) return supabaseGetResolved(alertId);
+  return kvGetResolved(alertId);
+}
+
+export async function saveSharedResolved(alertId: string, by: string): Promise<boolean> {
+  if (supabaseConfig() !== null) return supabaseSaveResolved(alertId, by);
+  return kvSaveResolved(alertId, by);
 }
 
 export async function getSharedSubscribers(): Promise<SharedSubscriber[] | null> {
