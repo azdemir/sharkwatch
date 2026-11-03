@@ -8,6 +8,9 @@ export async function GET() {
   }
   let username: string | null = null;
   try { username = await channel.botUsername(); } catch { username = null; }
+  // Merged list: file subscribers plus KV webhook joiners, so a user who
+  // joined on Vercel actually shows up in the count here.
+  const subscribers = await channel.mergedSubscribers();
   return NextResponse.json({
     configured: true,
     // Demo UI (StatusPanel TelegramLine) reads these names, not `configured`/
@@ -16,9 +19,9 @@ export async function GET() {
     username: username,
     link: username ? `https://t.me/${username}` : undefined,
     botUsername: username,
-    subscribers: channel.subscribers.length,
-    subscriberNames: channel.subscribers.map((s) => s.name),
-    hint: channel.subscribers.length === 0 ? `Send /start to @${username ?? "your bot"} on Telegram, then check here again.` : undefined,
+    subscribers: subscribers.length,
+    subscriberNames: subscribers.map((s) => s.name),
+    hint: subscribers.length === 0 ? `Send /start to @${username ?? "your bot"} on Telegram, then check here again.` : undefined,
   });
 }
 

@@ -51,6 +51,70 @@ export async function getSharedAck(alertId: string): Promise<SharedAck | null> {
   }
 }
 
+// Shared subscribers, for the same Vercel reason as acks, plus one more:
+// on Vercel the subscriber file is read-only and per-deploy, so a /start
+// processed there can never be saved to the file. Webhook /start saves
+// here instead, and broadcast merges this list with the file list
+// (deduplicated by chatId), so existing file subscribers like Adam and
+// Sema keep getting alerts while new webhook joiners are added without
+// a push. When KV is not configured every function below is a no-op
+// (null/false) and callers use the file list exactly as before.
+//
+// Key: sw:subscribers -> TelegramSubscriber[] (JSON).
+
+export interface SharedSubscriber {
+  chatId: number;
+  name: string;
+  joinedAt: string;
+  via?: string;
+}
+
+export async function getSharedSubscribers(): Promise<SharedSubscriber[] | null> {
+  const kv = kvConfig();
+  if (!kv) return null;
+  try {
+    const res = await fetch(`${kv.url}/get/sw%3Asubscribers`, {
+      headers: { Authorization: `Bearer ${kv.token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { result?: string | null };
+    if (!json.result) return [];
+    const parsed = JSON.parse(json.result) as SharedSubscriber[];
+    return Array.isArray(parsed) ? parsed.filter((s) => typeof s?.chatId === 'number') : [];
+  } catch {
+    return null;
+  }
+}
+
+async function setSharedSubscribers(list: SharedSubscriber[]): Promise<boolean> {
+  const kv = kvConfig();
+  if (!kv) return false;
+  try {
+    const res = await fetch(`${kv.url}/set/sw%3Asubscribers/${encodeURIComponent(JSON.stringify(list))}`, {
+      headers: { Authorization: `Bearer ${kv.token}` },
+      cache: 'no-store',
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function saveSharedSubscriber(sub: SharedSubscriber): Promise<boolean> {
+  const existing = (await getSharedSubscribers()) ?? [];
+  const next = existing.some((s) => s.chatId === sub.chatId)
+    ? existing.map((s) => (s.chatId === sub.chatId ? sub : s))
+    : [...existing, sub];
+  return setSharedSubscribers(next);
+}
+
+export async function removeSharedSubscriber(chatId: number): Promise<boolean> {
+  const existing = await getSharedSubscribers();
+  if (!existing) return false;
+  return setSharedSubscribers(existing.filter((s) => s.chatId !== chatId));
+}
+
 export async function saveSharedAck(alertId: string, by: string): Promise<boolean> {
   const kv = kvConfig();
   if (!kv) return false;

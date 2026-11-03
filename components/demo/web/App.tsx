@@ -134,6 +134,37 @@ export function App() {
   const lifeguardAck = currentAlert?.recipients.find((r) => r.role === 'lifeguards');
   const lifeguardAcknowledged = lifeguardAck?.status === 'acknowledged';
 
+  // Vercel-safe ack poll: the shared store is the only place a Telegram
+  // webhook ack is guaranteed to land, regardless of which instance
+  // raised the alert. Poll it for the current alert until it is
+  // acknowledged or resolved, then apply it locally so the UI shows
+  // "{by} acknowledged" even if the live streams missed it. On Mac
+  // local without KV this just returns acknowledged: false and does
+  // nothing, so the normal stream path is unchanged.
+  useEffect(() => {
+    if (!currentAlert || currentAlert.status === 'resolved' || lifeguardAcknowledged) return;
+    const alert = currentAlert;
+    const tick = async () => {
+      try {
+        const status = await api.ackStatus(alert.id);
+        if (!status.acknowledged || !status.by) return;
+        applyAlert({
+          ...alert,
+          version: alert.version + 1,
+          status: 'acknowledged',
+          recipients: alert.recipients.map((r) =>
+            r.role === 'lifeguards' ? { ...r, status: 'acknowledged' as const, acknowledgedBy: status.by, acknowledgedAt: status.at } : r,
+          ),
+        });
+      } catch {
+        // Poll again next tick.
+      }
+    };
+    void tick();
+    const timer = setInterval(tick, 4000);
+    return () => clearInterval(timer);
+  }, [currentAlert, lifeguardAcknowledged, applyAlert]);
+
   async function start() {
     if (!clip) return;
     setError(undefined);
@@ -398,7 +429,7 @@ export function App() {
                   {currentAlert.status !== 'resolved' && currentAlert.recipients.length > 0 && (
                     <>
                       {!lifeguardAcknowledged && (
-                        <button type="button" onClick={async () => { setError(undefined); try { applyAlert(await api.acknowledge(currentAlert.id, 'lifeguards', 'Operator')); } catch (e) { setError((e as Error).message); } }} className="alert-btn light">Acknowledge</button>
+                        <button type="button" onClick={async () => { setError(undefined); try { const res = await api.acknowledge(currentAlert.id, 'lifeguards', 'Operator'); if ('id' in res) { applyAlert(res); } else if (res.acknowledged) { applyAlert({ ...currentAlert, version: currentAlert.version + 1, status: 'acknowledged' as const, recipients: currentAlert.recipients.map((r) => (r.role === 'lifeguards' ? { ...r, status: 'acknowledged' as const, acknowledgedBy: res.by } : r)) }); } } catch (e) { setError((e as Error).message); } }} className="alert-btn light">Acknowledge</button>
                       )}
                       <button type="button" onClick={async () => { setError(undefined); try { applyAlert(await api.resolve(currentAlert.id)); } catch (e) { setError((e as Error).message); } }} className="alert-btn green">All clear</button>
                     </>

@@ -129,7 +129,29 @@ export function AuthorityConsole() {
       // Remembering the name is a convenience only.
     }
     const updated = await api.acknowledge(alert.id, role, by).catch(() => undefined);
-    if (updated) setAlerts((prev) => new Map(prev).set(updated.id, updated));
+    if (!updated) return;
+    if ('id' in updated) {
+      setAlerts((prev) => new Map(prev).set(updated.id, updated));
+    } else if (updated.acknowledged) {
+      // Shared-store fallback (the Vercel case): the server only returns
+      // { acknowledged, alertId, by }, not a full AlertJson, so build the
+      // acknowledged state from the alert this console already holds.
+      setAlerts((prev) => {
+        const next = new Map(prev);
+        const current = next.get(alert.id);
+        if (current) {
+          next.set(current.id, {
+            ...current,
+            version: current.version + 1,
+            status: 'acknowledged' as const,
+            recipients: current.recipients.map((r) =>
+              r.role === role ? { ...r, status: 'acknowledged' as const, acknowledgedBy: updated.by } : r,
+            ),
+          });
+        }
+        return next;
+      });
+    }
   }
 
   return (

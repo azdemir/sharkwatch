@@ -16,7 +16,7 @@ export async function GET(req: Request) {
   const res = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url, allowed_updates: ['callback_query'] }),
+    body: JSON.stringify({ url, allowed_updates: ['message', 'callback_query'] }),
   });
   const json = await res.json().catch(() => ({}));
   return NextResponse.json({ webhookUrl: url, telegram: json });

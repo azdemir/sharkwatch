@@ -7,6 +7,7 @@
 //
 // Moved from sharkwatch-vite/src/server/alerts/channels/telegram.ts (verbatim, except this note).
 
+import { getSharedSubscribers, removeSharedSubscriber, saveSharedSubscriber } from './ack-store';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
@@ -59,6 +60,20 @@ export class TelegramChannel {
     return this.state.subscribers;
   }
 
+  // File subscribers merged with KV subscribers (deduplicated by chatId,
+  // KV name wins on a clash). This is the list broadcast and the
+  // /api/telegram count must use on Vercel: the file alone is a stale
+  // deploy snapshot there, and KV alone would drop file subscribers who
+  // joined before the webhook existed. Without KV it is just the file.
+  async mergedSubscribers(): Promise<TelegramSubscriber[]> {
+    const shared = await getSharedSubscribers();
+    if (!shared) return [...this.state.subscribers];
+    const byId = new Map<number, TelegramSubscriber>();
+    for (const s of this.state.subscribers) byId.set(s.chatId, s);
+    for (const s of shared) byId.set(s.chatId, s);
+    return [...byId.values()];
+  }
+
   onAcknowledge(handler: (ack: Acknowledgement) => void): () => void {
     this.ackHandlers.add(handler);
     return () => this.ackHandlers.delete(handler);
@@ -76,7 +91,7 @@ export class TelegramChannel {
 
   async broadcast(alert: TelegramAlert): Promise<Map<number, number>> {
     const sent = new Map<number, number>();
-    for (const s of this.state.subscribers) {
+    for (const s of await this.mergedSubscribers()) {
       try {
         sent.set(s.chatId, await this.send(s.chatId, alert));
       } catch (error) {
@@ -163,6 +178,9 @@ export class TelegramChannel {
     if (!subscriber) {
       subscriber = { chatId, name, joinedAt: new Date().toISOString(), via };
       this.state.subscribers.push(subscriber);
+      // Best effort: also record in KV when configured, so this joiner
+      // shows up on Vercel without a push. No-op without KV.
+      await saveSharedSubscriber(subscriber);
     }
     await this.call('sendMessage', {
       chat_id: chatId,
@@ -176,6 +194,7 @@ export class TelegramChannel {
 
   private async unsubscribe(chatId: number): Promise<void> {
     this.state.subscribers = this.state.subscribers.filter((s) => s.chatId !== chatId);
+    await removeSharedSubscriber(chatId);
     await this.call('sendMessage', { chat_id: chatId, text: 'SharkWatch alerts are off. Send /start to turn them back on.' });
   }
 
