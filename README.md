@@ -68,8 +68,10 @@ every page) links back to `/`.
 - **Why SharkWatch (`/why-sharkwatch`)** — why warning time matters,
   with ISAF (Florida Museum of Natural History) bite statistics, and
   what SharkWatch does and does not do.
-- **FAQ (`/faq`)** — how it installs to a drone, what drone to use, how
-  much it costs, and its limits.
+- **FAQ (`/faq`)** — 8 straightforward questions: what SharkWatch is,
+  how it works, drone install, what drone to use, existing footage,
+  alert speed, what happens when a shark is found, and trying it
+  without a drone.
 - **Contact (`/contact`)** — pilot enquiries. The form opens the
   visitor's email client addressed to the contact email on the page;
   there is no backend inbox yet.
@@ -113,6 +115,48 @@ where it flies.
 - No accuracy percentage is claimed. Length is approximate, and
   visibility limits apply at night, in murky water, and in bad weather.
 
+### Measured in Replay, not a promise
+
+These numbers come from the recorded runs themselves, not from a live
+deployment. Replay makes no new API calls, so its cost is the recorded
+cost of the original Live run. There are 7 recorded patrols in Replay.
+
+- **Capistrano Beach, 19.1 s:** 191 frames at 10 fps. Shark first seen
+  at frame 34. Muse Spark verification 5,087 ms, at 85% confidence,
+  white-shark species guess at low species confidence, evidence length
+  about 2.6 m. Recorded cost: $0.005.
+- **Screened out, not alerted:** in the same Capistrano run, a person
+  track was seen for only 2 frames, then dropped by the 8-frame rule.
+  It never became an alert. A flash does not become an alarm. This is
+  the demo's negative case — no dolphin or kelp clip is claimed, because
+  no such verified recording exists in the golden set.
+- **Cost, recorded:** Capistrano $0.005, swimmer clip (clip-b) $0.042.
+  That range is for those two runs only, not a price for every beach,
+  and not a subscription. Replay itself costs $0 in new calls.
+- **What this does not prove:** no lifeguard has piloted SharkWatch on
+  a real beach yet, no accuracy percentage is claimed, and Replay
+  agencies and locations are simulated.
+- **Pilot ask:** one beach, one lifeguard contact, permission to run
+  Replay on that beach's own drone footage, then a Telegram alert test.
+  No partner is claimed until one says yes.
+
+### Hackathon submission
+
+- **Track:** Indie, Meta Global AI Developer Hackathon 2026.
+- **Live site:** https://sharkwatch.vercel.app
+- **Demo:** https://sharkwatch.vercel.app/demo (Replay only on Vercel;
+  Live and uploads are local only — see Demo above).
+- **Demo video (3 minutes):** unlisted YouTube link to be added after
+  recording. Do not submit a placeholder link in place of the video.
+- **Models used at runtime:** SAM 3.1 for segmentation, Muse Spark for
+  verification, both via the Meta Model API in Live mode only. Replay
+  uses recorded results and makes no new calls.
+- **What judges should test first:** open /demo, leave it on the
+  default Capistrano clip in Replay, press Start patrol, watch SAM
+  tracing, then the Spark card, then the Telegram alert, Acknowledge,
+  and All clear. Then read the Screened out note above — that is the
+  false-alarm control.
+
 ## Tech used
 
 | Layer | What |
@@ -154,23 +198,23 @@ Both are called through the Meta Model API only in Live mode. Replay
 uses recorded results and makes no new calls. `lib/detect.ts` is
 deterministic for demo repeatability.
 
-### Mentioned for the hackathon, not used by SharkWatch
+### Mentioned for the hackathon, not used at runtime by SharkWatch
 
 The hackathon's model list, as described in hackathon summaries (third-
 party guides, not the official Meta rules page — check the official
 page before citing this in a submission), also names:
 
-- **Muse Wonder** — Meta's frontier model, listed alongside Spark for general reasoning and text.
-- **Muse Image** — image generation.
-- **Muse Voice Transcribe** — speech-to-text.
-- **Muse Glimmer** — an open-weights model named in the same lists.
-- **Meta open-weights models** — the wider open-weights family available through the Model API and partner credits (Baseten, Modal, Fireworks).
-- **Muse Code** — Meta's agentic coding tool, not a model in the app, but part of the hackathon tooling.
+- **Muse Wonder** — Meta's frontier model, listed alongside Spark for general reasoning and text. Used during development: most of SharkWatch was built with Muse Wonder assistance.
+- **Muse Image** — image generation. Used during development for generating images.
+- **Muse Voice Transcribe** — speech-to-text. Not used.
+- **Muse Glimmer** — an open-weights model named in the same lists. Not used.
+- **Muse Code** — Meta's agentic coding tool, not a model in the app, but part of the hackathon tooling. Used during development.
 
-SharkWatch does not use Wonder, Image, Voice Transcribe, Glimmer, or
-Muse Code in the app itself. Claiming otherwise would be wrong: the
-app's AI is SAM 3.1 for segmentation and Muse Spark for verification,
-and nothing else at runtime.
+Development use is not runtime use: Wonder, Image, and Muse Code
+helped build SharkWatch, but none of them runs in the app itself.
+Claiming runtime use would be wrong: the app's AI is SAM 3.1 for
+segmentation and Muse Spark for verification, and nothing else at
+runtime.
 
 ## APIs
 

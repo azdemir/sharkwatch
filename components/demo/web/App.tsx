@@ -386,6 +386,7 @@ export function App() {
                   <div className="flex flex-col border border-rule bg-sheet p-4"><div className="label">Length (evidence)</div><b className="mt-2 block text-[26px]">~2.6 m</b><div className="mt-auto pt-3 text-[12px] text-ink-3">White-shark guess, low species confidence</div></div>
                   <div className="flex flex-col border border-rule bg-sheet p-4"><div className="label">Verification time</div><b className="mt-2 block text-[26px]">5,087 ms</b><div className="mt-auto pt-3 text-[12px] text-ink-3">First seen frame 34 · 191 frames · recorded cost $0.005</div></div>
                 </div>
+                <p className="mt-4 text-[13px] leading-[1.6] text-ink-2"><b className="text-ink">Screened out, not alerted, the negative case.</b> In the same Capistrano run, a person track was seen for only 2 frames, then dropped by the 8-frame rule. It never became an alert. A flash does not become an alarm.</p>
               </div>
             )}
           </section>
