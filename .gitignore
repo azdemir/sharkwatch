@@ -4,7 +4,11 @@ out/
 data/reports.json
 *.log
 .DS_Store
-data/sessions/golden/*
+# Run output: Live sessions in data/sessions/ are not committed.
+# Golden Replay recordings are the exception and stay tracked.
+data/sessions/*
+!data/sessions/golden/
+!data/sessions/golden/**
 data/uploads/
 data/.cache/
 # Secrets — never commit these. .env was missing here, which is how it
