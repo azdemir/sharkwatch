@@ -50,6 +50,7 @@ export interface SessionResult {
   tracks: TrackSummary[];
   costUsd: number;
   reason: 'completed' | 'error' | 'budget' | 'stopped';
+  message?: string;
 }
 
 const sleep = (ms: number, signal?: AbortSignal) =>
@@ -99,6 +100,7 @@ export async function runSession(options: SessionOptions): Promise<SessionResult
 
   const verifications: Promise<void>[] = [];
   let reason: SessionResult['reason'] = 'completed';
+  let errorMessage: string | undefined;
 
   const segmentAll = async (chunk: ClipChunk, concepts: Concept[]) =>
     Promise.all(
@@ -146,6 +148,17 @@ export async function runSession(options: SessionOptions): Promise<SessionResult
       framesBilled += run.result!.framesBilled;
     }
     if (reason === 'budget') break;
+
+    // A chunk where every SAM call failed is a systemic failure — most
+    // often a rejected Meta key (401/403) — not an empty ocean. Continuing
+    // through every chunk and then reporting "completed" with 0 alerts
+    // hid exactly that failure in the log. Stop here, as an error, so
+    // the UI shows the failure instead of a clean patrol complete.
+    if (runs.length > 0 && runs.every((r) => r.error)) {
+      reason = 'error';
+      errorMessage = runs.find((r) => r.error)?.error?.message ?? 'Meta SAM detection failed';
+      break;
+    }
 
     const ingest = tracker.ingest(chunk, mergeConcepts(byConcept));
     costUsd += framesBilled * SAM_USD_PER_FRAME;
@@ -199,6 +212,6 @@ export async function runSession(options: SessionOptions): Promise<SessionResult
   }
 
   await Promise.all(verifications);
-  bus.emit({ type: 'session.ended', reason, costUsd });
-  return { tracks: tracker.summaries(), costUsd, reason };
+  bus.emit({ type: 'session.ended', reason, message: errorMessage, costUsd });
+  return { tracks: tracker.summaries(), costUsd, reason, message: errorMessage };
 }

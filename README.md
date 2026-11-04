@@ -87,14 +87,13 @@ every page) links back to `/`.
   Acknowledge / All clear / CAP XML, and Telegram alerts when a bot
   token is set. Replay makes no new Meta API calls — its costs are the
   recorded costs of the original Live runs.
-- **Live (local only)** — SAM 3.1 + Muse Spark on new footage:
-  paste a YouTube link or upload a clip, and the demo runs detection
-  on it. Live needs a Meta Model API key and a local run (see
-  Environment below). On Vercel, Live is hidden and replaced with a
-  plain local-only note, because Vercel's filesystem is read-only,
-  it has no yt-dlp, and it has no long-running server for SAM/Spark
-  sessions. `GET /api/health` reports `uploads: false` on Vercel and
-  `true` locally.
+- **Live (local only)** — SAM 3.1 + Muse Spark on a clip, run locally
+  with a Meta Model API key (see Environment below). There is no
+  upload or YouTube import in the demo UI: Live runs on a clip already
+  in the project. On Vercel, Live is hidden and replaced with a plain
+  local-only note, because Vercel's filesystem is read-only and it has
+  no long-running server for SAM/Spark sessions. `GET /api/health`
+  reports `live: false` on Vercel.
 
 Demo agencies in Replay are simulated. No real agency is contacted.
 
@@ -133,19 +132,12 @@ renamed by SharkWatch:
 - **Acknowledged by an operator, on the demo page:** click Acknowledge
   in `/demo`. The demo page has no name input, so this is recorded as
   **Operator**, and the demo shows “✓ Operator acknowledged”.
-- **Acknowledged by an operator, in the authority console:** open
-  `/console?role=lifeguards` (or `beach_management` /
-  `coastal_security`), type a name in the “Signing as” field, and click
-  Acknowledge. That name is used (saved in the browser's local storage
-  for next time); if the field is blank, the agency name for that role
-  is used instead.
-- **All clear:** click All clear in `/demo` (or in the console). This
-  resolves the alert. It is recorded as given by Operator by default,
-  and the console shows “All clear, given by {name} at {time}”. On
-  Vercel, All clear uses the same shared store as Acknowledge, so it
-  does not fail with “Unknown alert” just because a different instance
-  handles the request — unless no shared store is configured at all,
-  in which case that error is real.
+- **All clear:** click All clear in `/demo`. This resolves the alert.
+  It is recorded as given by Operator by default. On Vercel, All clear
+  uses the same shared store as Acknowledge, so it does not fail with
+  “Unknown alert” just because a different instance handles the request
+  — unless no shared store is configured at all, in which case that
+  error is real.
 
 A Telegram ack counts as the lifeguards recipient acknowledging: it
 marks that recipient acknowledged in the demo, and hides the demo
@@ -173,7 +165,7 @@ where it flies.
 
 These numbers come from the recorded runs themselves, not from a live
 deployment. Replay makes no new API calls, so its cost is the recorded
-cost of the original Live run. There are 7 recorded patrols in Replay.
+cost of the original Live run. There are 5 recorded patrols in Replay.
 
 - **Capistrano Beach, 19.1 s:** 191 frames at 10 fps. Shark first seen
   at frame 34. Muse Spark verification 5,087 ms, at 85% confidence,
@@ -199,9 +191,9 @@ cost of the original Live run. There are 7 recorded patrols in Replay.
 - **Track:** Indie, Meta Global AI Developer Hackathon 2026.
 - **Live site:** https://sharkwatch.vercel.app
 - **Demo:** https://sharkwatch.vercel.app/demo (Replay only on Vercel;
-  Live and uploads are local only — see Demo above).
-- **Demo video (3 minutes):** unlisted YouTube link to be added after
-  recording. Do not submit a placeholder link in place of the video.
+  Live is local only — see Demo above).
+- **Demo video (3 minutes):** the unlisted YouTube link is in the
+  hackathon submission form.
 - **Models used at runtime:** SAM 3.1 for segmentation, Muse Spark for
   verification, both via the Meta Model API in Live mode only. Replay
   uses recorded results and makes no new calls.
@@ -254,9 +246,7 @@ deterministic for demo repeatability.
 
 ### Mentioned for the hackathon, not used at runtime by SharkWatch
 
-The hackathon's model list, as described in hackathon summaries (third-
-party guides, not the official Meta rules page — check the official
-page before citing this in a submission), also names:
+The hackathon's model list also names:
 
 - **Muse Wonder** — Meta's frontier model, listed alongside Spark for general reasoning and text. Used during development: most of SharkWatch was built with Muse Wonder assistance.
 - **Muse Image** — image generation. Used during development for generating images.
@@ -280,11 +270,13 @@ runtime.
 - `POST /api/uploads` — local only; returns a plain local-only message (501) on Vercel
 - `GET /media/[...path]` — playback (playback.mp4 only)
 
-## Run it locally (on your Mac)
+## Run it locally
 
 ```bash
-cd ~/Desktop/sharkwatch
-npm install
+git clone https://github.com/azdemir/sharkwatch.git
+cd sharkwatch
+cp .env.example .env   # then fill in your own keys, never commit .env
+npm ci
 npm run dev
 # open http://localhost:3000
 # demo: http://localhost:3000/demo
@@ -292,6 +284,7 @@ npm run dev
 
 ```bash
 npm run build   # production build check
+npx playwright install chromium   # browsers are not installed by npm ci
 npm run test:e2e  # Playwright tests
 ```
 
@@ -299,13 +292,14 @@ One server only. No separate Vite or demo server.
 
 ## Environment
 
-Set these in `.env` (never commit the file):
+Set these in `.env` (never commit the file). `.env.example` at the repo root lists the same names with blank values only — copy it, do not edit it with real keys:
 
 - `MODEL_API_KEY` (preferred) or `META_KEY` (fallback) — Meta Model API key, for Live detection. Without it, Live is disabled and Replay still works.
 - `TELEGRAM_BOT_TOKEN` — for Telegram alerts. Without it, the demo works as before, with no Telegram broadcast. After a bot is set up, send `/start` to the bot to subscribe (bot: @SharkDetectionBot).
+- `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (optional, Vercel) — shared store for acks, subscribers and All clear, so they survive across Vercel instances. Without it, Vercel falls back to the in-memory store and acks can be lost between instances. Run `supabase/ack-store.sql` once to create the tables.
 
 ## Deploying / limits
 
-- **Replay works on Vercel** (https://sharkwatch.vercel.app). Uploads and Live detection are local-only by design: Vercel's filesystem is read-only, and it has no yt-dlp and no long-running server for SAM/Spark sessions. On Vercel, `/api/uploads` returns a plain local-only message instead of failing with a filesystem error, and the demo shows that note instead of Run Live.
-- Uploads are local-dev only, not Vercel. Demo agencies in Replay are simulated.
+- **Replay works on Vercel** (https://sharkwatch.vercel.app). Live detection is local-only by design: Vercel's filesystem is read-only and it has no long-running server for SAM/Spark sessions. On Vercel, `/api/uploads` returns a plain local-only message instead of failing with a filesystem error, and the demo shows a Replay-only note.
+- Demo agencies in Replay are simulated.
 - The demo's Telegram QR line and subscriber count depend on the bot token being set on the deployment and on users sending `/start`.

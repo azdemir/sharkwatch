@@ -316,7 +316,7 @@ export default function Home() {
               These numbers come from the recorded runs themselves, not
               from a live deployment. Replay makes no new API calls, so
               its cost is the recorded cost of the original Live run.
-              There are 7 recorded patrols in Replay.
+              There are 5 recorded patrols in Replay.
             </p>
             <div className="how-measured-grid">
               <div>

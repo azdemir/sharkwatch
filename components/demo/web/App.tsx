@@ -156,7 +156,7 @@ export function App() {
       <div className="mx-auto flex w-full max-w-[1560px] flex-col gap-5 px-4 pb-8 pt-7 sm:px-6 lg:px-7">
         {health && health.uploads === false && (
           <section className={`${card} px-5 py-4`}>
-            <p className="text-[13px] leading-[1.6] text-ink-2"><b className="text-ink">Public demo (Vercel), Replay only.</b> The 7 recorded patrols below run with no new API calls and no key. Live detection does not run here, even when a Meta key is set, because Vercel has a read-only filesystem and no long-running server for SAM/Spark sessions. In Replay, agencies and locations are simulated, no real agency is contacted. Run locally with <span className="font-mono">npm run dev</span> and a Meta key for Live.</p>
+            <p className="text-[13px] leading-[1.6] text-ink-2"><b className="text-ink">Public demo (Vercel), Replay only.</b> The 5 recorded patrols below run with no new API calls and no key. Live detection does not run here, even when a Meta key is set, because Vercel has a read-only filesystem and no long-running server for SAM/Spark sessions. In Replay, agencies and locations are simulated, no real agency is contacted. Run locally with <span className="font-mono">npm run dev</span> and a Meta key for Live.</p>
           </section>
         )}
         {health && health.uploads !== false && health.live && (
@@ -208,6 +208,7 @@ export function App() {
         </section>
 
         {error && <div className="rounded-none border border-red/40 bg-red/10 px-5 py-3 text-[13px] text-red">{error}</div>}
+        {state.status === 'ended' && state.error && <div className="rounded-none border border-red/40 bg-red/10 px-5 py-3 text-[13px] text-red">Patrol ended with an error: {state.error}. No alerts were sent for this run — check the Meta key in .env and run again.</div>}
 
         {/* Detection + Alerts: the story, and the accountability. */}
         <main className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12">
