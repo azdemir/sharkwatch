@@ -400,7 +400,7 @@ export default function Home() {
               <span style={{ color: "#9db4bc" }}>Muse Spark 1.1 Meta</span>
               <span style={{ color: "#9db4bc" }}>Muse Wonder</span>
               <span style={{ color: "#9db4bc" }}>Next.js 14 + TypeScript</span>
-              <span style={{ color: "#9db4bc" }}>Fastify + SSE</span>
+              <span style={{ color: "#9db4bc" }}>SSE</span>
             </div>
           </div>
           <div>

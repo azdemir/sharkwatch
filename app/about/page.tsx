@@ -24,7 +24,7 @@ export default function About() {
         <div className="contact-grid" style={{ marginTop: 32 }}>
           <div><div className="descent-mono" style={{ color: "#90e0c8", marginBottom: 6, fontSize: 11 }}>Replay, free, no key</div><p>A recorded run of the real pipeline at real-time speed. No new API calls, no cost, and the agencies in it are simulated, no real agency is contacted in Replay.</p></div>
           <div><div className="descent-mono" style={{ color: "#90e0c8", marginBottom: 6, fontSize: 11 }}>Live, SAM 3.1 + Muse Spark</div><p>Runs the models on footage as it plays, about $0.03–0.20 per patrol. Live needs a Meta key and is local-dev only.</p></div>
-          <div><div className="descent-mono" style={{ color: "#90e0c8", marginBottom: 6, fontSize: 11 }}>Tech</div><p>Meta SAM 3.1 · Meta Muse Spark 1.3 · Next.js 14 + TypeScript · Fastify + SSE.</p></div>
+          <div><div className="descent-mono" style={{ color: "#90e0c8", marginBottom: 6, fontSize: 11 }}>Tech</div><p>Meta SAM 3.1 · Meta Muse Spark 1.3 · Next.js 14 + TypeScript · SSE.</p></div>
         </div>
         <p style={{ marginTop: 32, display: "flex", gap: 12, flexWrap: "wrap" }}>
           <Link href="/demo" className="descent-btn solid" style={{ textDecoration: "none", display: "inline-block" }}>Try the Demo →</Link>

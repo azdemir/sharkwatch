@@ -207,7 +207,7 @@ cost of the original Live run. There are 5 recorded patrols in Replay.
 
 | Layer | What |
 | --- | --- |
-| App | Next.js 14.2.18 (App Router), React 18.3.1, TypeScript 5.5.4 |
+| App | Next.js 14.2.35 (App Router), React 18.3.1, TypeScript 5.5.4 |
 | Styling | Tailwind CSS 4.1.0 (`@tailwindcss/postcss`), plus `app/globals.css` for the landing page and `app/demo/demo.css` for the demo |
 | Maps | Leaflet 1.9.4 + react-leaflet 4.2.1 (demo map, coast framing, distance to shore) |
 | Meta Model API | OpenAI SDK 4.104.0 — the Meta Model API is OpenAI-compatible, so the same client is used with `baseURL https://api.meta.ai/v1` (see `components/demo/server/meta/client.ts`) |
