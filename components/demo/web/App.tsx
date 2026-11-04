@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import type { ClipInfo, HealthInfo, RecordingInfo } from '../shared/api.ts';
 import { assessRisk, speciesPhrase } from '../shared/risk.ts';
@@ -26,78 +26,7 @@ export function App() {
   const [showLost, setShowLost] = useState(false);
   const [telegram, setTelegram] = useState<TelegramInfo>();
   const { state, connect, reset, applyAlert } = useSession();
-  /* Uploaded footage: played back in the visitor's own browser only (an
-   * object URL, the file is never sent to the server) until the visitor
-   * presses Run Live detection, which sends it to /api/uploads and then
-   * starts a real Live SAM 3.1 + Muse Spark session over it. The preview
-   * itself draws no boxes, species or alerts, that only happens in the
-   * hero feed once a Live session is running. */
-  const [uploaded, setUploaded] = useState<{ name: string; url: string; source: 'file' | 'url'; file?: File } | null>(null);
-  const [uploadClip, setUploadClip] = useState<ClipInfo | null>(null);
-  const [uploadBusy, setUploadBusy] = useState<string | null>(null);
-  const [showUpload, setShowUpload] = useState(false);
-  const [uploadUrl, setUploadUrl] = useState('');
-  const uploadRef = useRef<HTMLInputElement>(null);
-  const clearUploaded = () => {
-    if (uploaded?.source === 'file') URL.revokeObjectURL(uploaded.url);
-    setUploaded(null);
-    setUploadClip(null);
-    setUploadBusy(null);
-  };
-  const onUploadFile = (file: File | undefined) => {
-    if (!file) return;
-    if (!file.type.startsWith('video/')) {
-      setError('Please choose a video file.');
-      return;
-    }
-    clearUploaded();
-    setError(undefined);
-    setUploaded({ name: file.name, url: URL.createObjectURL(file), source: 'file', file });
-    setShowUpload(false);
-  };
-  const onUploadUrl = () => {
-    const url = uploadUrl.trim();
-    if (!/^https?:\/\//i.test(url)) {
-      setError('Paste a direct video link starting with https://, a watch page will not play.'); 
-      return;
-    }
-    clearUploaded();
-    setError(undefined);
-    setUploaded({ name: url, url, source: 'url' });
-    setShowUpload(false);
-  };
 
-  const runLiveDetection = async () => {
-    if (!uploaded || running) return;
-    setError(undefined);
-    setUploadBusy('Sending your footage to the server…');
-    try {
-      const sent = uploaded.source === 'file' && uploaded.file ? await api.uploadFile(uploaded.file) : await api.uploadUrl(uploaded.url);
-      if (!sent.liveAvailable) {
-        setUploadBusy(null);
-        setError('Live detection is not available: no Meta key is configured on this server.');
-        return;
-      }
-      setUploadClip(sent.clip);
-      setUploadBusy('Starting Live SAM 3.1 analysis…');
-      let passcode: string | undefined;
-      if (health?.livePasscodeRequired) {
-        passcode = window.prompt('Live mode uses paid Meta API calls. Enter the passcode:') ?? undefined;
-        if (!passcode) { setUploadBusy(null); return; }
-      }
-      const started = await api.start({ mode: 'live', uploadId: sent.uploadId, passcode });
-      setUploadBusy(null);
-      setShowUpload(false);
-      clearUploaded();
-      setUploadClip(sent.clip);
-      reset();
-      setSelectedId(undefined);
-      connect(started.sessionId);
-    } catch (e) {
-      setUploadBusy(null);
-      setError((e as Error).message);
-    }
-  };
 
   useEffect(() => {
     Promise.all([api.health(), api.clips(), api.recordings()])
@@ -113,15 +42,15 @@ export function App() {
     api.telegram().then(setTelegram).catch(() => setTelegram({ enabled: false }));
   }, []);
 
-  const clip = uploadClip ?? clips.find((c) => c.id === clipId);
+  const clip = clips.find((c) => c.id === clipId);
   const hasRecording = recordings.some((r) => r.clipId === clipId);
   /* No Replay/Live toggle any more: Start patrol picks the mode itself.
    * A recorded clip replays (free, no new calls); a clip with no
    * recording runs Live when this server can run it, otherwise Start
    * stays disabled, same as Replay-with-no-recording did before. */
-  const mode: Mode = uploadClip ? 'live' : hasRecording ? 'replay' : health?.live ? 'live' : 'replay';
+  const mode: Mode = hasRecording ? 'replay' : health?.live ? 'live' : 'replay';
   const running = state.status === 'connecting' || state.status === 'running';
-  const canStart = !uploadClip && Boolean(clip) && (hasRecording || Boolean(health?.live));
+  const canStart = Boolean(clip) && (hasRecording || Boolean(health?.live));
   const tracks = useMemo(() => visibleTracks(state), [state]);
   const departed = useMemo(() => departedTracks(state), [state]);
   const allTracks = [...tracks, ...departed];
@@ -199,7 +128,6 @@ export function App() {
   function chooseClip(id: string) {
     reset();
     setSelectedId(undefined);
-    setUploadClip(null);
     setClipId(id);
   }
 
@@ -222,122 +150,18 @@ export function App() {
             <span>{mode === 'live' ? 'LIVE · PAID META CALLS' : 'REPLAY · NO NEW API CALLS'}</span>
             <span title="Meta Model API cost for this session">API ${state.costUsd.toFixed(3)}</span>
           </span>
-          {health?.uploads !== false && (
-            <button type="button" className="upload-btn" onClick={() => setShowUpload((v) => !v)}>
-              Upload video
-            </button>
-          )}
-          <input
-            ref={uploadRef}
-            type="file"
-            accept="video/*"
-            className="hidden"
-            aria-label="Upload your own video"
-            onChange={(e) => {
-              onUploadFile(e.target.files?.[0]);
-              e.target.value = '';
-            }}
-          />
         </div>
       </header>
 
       <div className="mx-auto flex w-full max-w-[1560px] flex-col gap-5 px-4 pb-8 pt-7 sm:px-6 lg:px-7">
         {health && health.uploads === false && (
           <section className={`${card} px-5 py-4`}>
-            <p className="text-[13px] leading-[1.6] text-ink-2"><b className="text-ink">Public demo (Vercel), Replay only.</b> The 7 recorded patrols below run with no new API calls and no key. Live detection and uploads do not run here, even when a Meta key is set, because Vercel has a read-only filesystem and no long-running server for SAM/Spark sessions. In Replay, agencies and locations are simulated, no real agency is contacted. Run locally with <span className="font-mono">npm run dev</span> and a Meta key for Live and uploads.</p>
+            <p className="text-[13px] leading-[1.6] text-ink-2"><b className="text-ink">Public demo (Vercel), Replay only.</b> The 7 recorded patrols below run with no new API calls and no key. Live detection does not run here, even when a Meta key is set, because Vercel has a read-only filesystem and no long-running server for SAM/Spark sessions. In Replay, agencies and locations are simulated, no real agency is contacted. Run locally with <span className="font-mono">npm run dev</span> and a Meta key for Live.</p>
           </section>
         )}
         {health && health.uploads !== false && health.live && (
           <section className={`${card} px-5 py-4`}>
             <p className="text-[13px] leading-[1.6] text-ink-2"><b className="text-ink">Local demo, Replay.</b> Replay is free and makes no new API calls.</p>
-          </section>
-        )}
-        {showUpload && (
-          <section className={`${card} px-5 py-5`}>
-            <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <h2 className="label">Upload a video, file or link</h2>
-              <button
-                type="button"
-                className="text-[12px] font-[700] uppercase tracking-[0.08em] text-ink-2 underline"
-                onClick={() => setShowUpload(false)}
-              >
-                Cancel
-              </button>
-            </div>
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <button type="button" className="alert-btn light" onClick={() => uploadRef.current?.click()}>
-                Choose a file
-              </button>
-              <span className="text-[13px] text-ink-3">or paste a direct video link:</span>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-3">
-              <input
-                type="url"
-                value={uploadUrl}
-                onChange={(e) => setUploadUrl(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') onUploadUrl();
-                }}
-                placeholder="https://example.com/drone-footage.mp4"
-                className="min-w-[240px] flex-1 border border-rule-strong bg-sheet px-3 py-3 text-[13px] text-ink placeholder:text-ink-3"
-                aria-label="Direct video link"
-              />
-              <button type="button" className="alert-btn green" onClick={onUploadUrl}>
-                Use this link
-              </button>
-            </div>
-            <p className="mt-3 text-[12px] leading-[1.6] text-ink-3">
-              Paste a direct video link (for example an .mp4 link), or a YouTube link copied from
-              YouTube, YouTube links are downloaded with yt-dlp on the machine running this
-              server, so yt-dlp must be installed (brew install yt-dlp on a Mac) or the download
-              will say so plainly. Uploads and Live are local only and are not offered on the
-              public Vercel demo. When you run Live detection from the preview card, the server
-              downloads that same link and analyses it. A YouTube preview will not play in the
-              browser until it is downloaded.
-            </p>
-          </section>
-        )}
-        {uploaded && (
-          <section className={`${card} px-5 py-5`}>
-            <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <h2 className="label">Your footage, preview only</h2>
-              <button
-                type="button"
-                className="text-[12px] font-[700] uppercase tracking-[0.08em] text-ink-2 underline"
-                onClick={clearUploaded}
-              >
-                Remove
-              </button>
-            </div>
-            <p className="mt-2 break-all text-[13px] leading-[1.6] text-ink-2">
-              {uploaded.source === 'file'
-                ? `${uploaded.name}, previewing in your browser only; this file has not been sent to the server yet.`
-                : `${uploaded.name}, streaming from that link; nothing has been downloaded yet.`}
-              {' '}Press Run Live detection below and the server will send this footage to Meta's
-              SAM 3.1 + Muse Spark (paid calls) and draw the real boxes in the hero feed.
-              Until then this is a preview only, no detection has run on it.
-            </p>
-            {error && <div className="mt-4 rounded-none border border-red/40 bg-red/10 px-4 py-3 text-[13px] text-red">{error}</div>}
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              {health?.uploads === false ? (
-                <span className="text-[13px] text-ink-2">Uploads and Live detection are not available on Vercel, Vercel has a read-only filesystem, no yt-dlp, and no long-running server for SAM/Spark sessions. Run the demo locally with npm run dev to use uploads and Live detection. Replay clips still work here.</span>
-              ) : health?.live ? (
-                <button type="button" className="alert-btn green" onClick={runLiveDetection} disabled={Boolean(uploadBusy) || running}>
-                  {uploadBusy ? uploadBusy : 'Run Live detection'}
-                </button>
-              ) : (
-                <span className="text-[13px] text-ink-2">Live detection needs a Meta key on this server, add MODEL_API_KEY (or META_KEY) to .env and restart, then come back here.</span>
-              )}
-              <span className="text-[12px] text-ink-3">LIVE results are labelled LIVE, not simulated. If SAM or Muse Spark fails, the patrol ends with an error, no invented boxes.</span>
-            </div>
-            <video src={uploaded.url} controls playsInline className="mt-4 aspect-video w-full bg-monitor object-contain" />
-          </section>
-        )}
-        {uploadClip && !uploaded && (
-          <section className={`${card} flex flex-wrap items-center gap-3 px-5 py-3`}>
-            <span className="label">Showing your footage, LIVE</span>
-            <span className="break-all text-[13px] text-ink-2">{uploadClip.title}</span>
-            <button type="button" className="ml-auto text-[12px] font-[700] uppercase tracking-[0.08em] text-ink-2 underline" onClick={() => { reset(); setUploadClip(null); }}>Back to patrol footage</button>
           </section>
         )}
         {/* Hero row: smaller video (7 cols, ~860px wide, ~485px tall) with the map
@@ -379,7 +203,7 @@ export function App() {
           {running ? (
             <button type="button" onClick={stop} className="primary stop">Stop patrol</button>
           ) : (
-            <button type="button" onClick={start} disabled={!canStart} title={uploadClip ? 'Your footage runs from its preview card, press Run Live detection there' : mode === 'replay' && !hasRecording ? 'No recording for this clip yet' : undefined} className="primary">{state.status === 'ended' ? 'Run again' : 'Start patrol'}</button>
+            <button type="button" onClick={start} disabled={!canStart} title={mode === 'replay' && !hasRecording ? 'No recording for this clip yet' : undefined} className="primary">{state.status === 'ended' ? 'Run again' : 'Start patrol'}</button>
           )}
         </section>
 
