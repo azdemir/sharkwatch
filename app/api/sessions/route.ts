@@ -32,6 +32,19 @@ export async function POST(req: Request) {
   const recordings = listRecordings();
   const recordingId = body.recording ?? recordings.find((r) => r.clipId === body.clipId)?.id;
   if (!recordingId) return NextResponse.json({ error: 'No recording for this clip' }, { status: 404 });
+  // 2026-11-04 fix for Vercel 'Patrol ended with an error' every time:
+  // Vercel serverless instances do not share memory, so a session created
+  // by POST on instance A is invisible to the SSE GET on instance B,
+  // which returned 404 'Unknown session' and closed the stream. On
+  // Vercel, do NOT create an in-memory session at all: return a session
+  // id in the usual '<clipId>-replay-<ts>' form, and let the SSE route
+  // stream the recording statelessly from disk on whatever instance
+  // serves it. Mac local keeps the in-memory path (single server).
+  if (process.env.VERCEL === '1') {
+    const clipId = body.clipId ?? recordings.find((r) => r.id === recordingId)?.clipId;
+    if (!clipId) return NextResponse.json({ error: 'No recording for this clip' }, { status: 404 });
+    return NextResponse.json({ sessionId: `${clipId}-replay-${Date.now().toString(36)}`, mode: 'replay', clipId });
+  }
   try { const handle = startReplaySession(recordingId, speed); return NextResponse.json({ sessionId: handle.id, mode: 'replay', clipId: handle.clipId }); }
   catch (error) { if (error instanceof LiveUnavailableError) return NextResponse.json({ error: error.message }, { status: 403 }); return NextResponse.json({ error: (error as Error).message }, { status: 404 }); }
 }
