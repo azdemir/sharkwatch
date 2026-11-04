@@ -23,8 +23,12 @@ export function getTelegramChannel(): TelegramChannel | null {
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-/** Broadcast a saved report to Telegram subscribers. Returns how many chats got it. Never throws. */
+/** Broadcast a saved report to Telegram subscribers. Returns how many chats got it. Never throws.
+ * Gated: real sends need TELEGRAM_REAL_ALERTS=1. Without it this is a
+ * no-op (0 sent) so a report submitted by a reviewer can never message
+ * real subscribers just because a bot token happens to be configured. */
 export async function broadcastReport(report: Report): Promise<number> {
+  if (process.env.TELEGRAM_REAL_ALERTS?.trim() !== '1') return 0;
   try {
     const channel = getTelegramChannel();
     if (!channel) return 0;

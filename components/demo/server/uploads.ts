@@ -41,7 +41,10 @@ function probeFps(path: string): Promise<number> {
     const err: Buffer[] = [];
     child.stdout.on('data', (c: Buffer) => out.push(c));
     child.stderr.on('data', (c: Buffer) => err.push(c));
-    child.on('error', reject);
+    child.on('error', (e: NodeJS.ErrnoException) => {
+      if (e.code === 'ENOENT') reject(new Error(`ffprobe not found at ${FFPROBE} (ENOENT) — check node_modules/ffprobe-static exists, or set FFPROBE_PATH to a real binary, then restart the server.`));
+      else reject(e);
+    });
     child.on('close', (code) => {
       if (code !== 0) return reject(new Error(`ffprobe exited ${code}: ${Buffer.concat(err).toString().slice(-400)}`));
       const stream = JSON.parse(Buffer.concat(out).toString()).streams?.[0];

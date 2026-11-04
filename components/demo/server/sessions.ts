@@ -99,7 +99,12 @@ function alertServiceFor(bus: EventBus, sessionId: string, clipId: string, dir: 
     if (agentCalls >= config.agentCallBudget) return templateDraft(r, `Agent call budget (${config.agentCallBudget}) reached: templates used`);
     agentCalls++;
     return draftWithAgent(r);
-  }, telegram: demoTelegramChannel(), escalateAfterS: 45, onChange: (alert) => alertHub.publish(alert) });
+  }, // Real Telegram only for a Live session that the operator explicitly
+  // opted into (TELEGRAM_REAL_ALERTS=1). Replay NEVER sends to real
+  // subscribers — that is the path reviewers use, on Vercel and locally —
+  // and Live without the flag also stays in-app only. Alerts still show
+  // in the demo UI either way; only the real Telegram send is gated.
+  telegram: opts.live && config.telegramRealAlerts ? demoTelegramChannel() : undefined, escalateAfterS: 45, onChange: (alert) => alertHub.publish(alert) });
   alertHub.register(sessionId, service);
   return service;
 }

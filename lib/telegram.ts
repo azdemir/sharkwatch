@@ -157,8 +157,14 @@ export class TelegramChannel {
     let backoffMs = 1000;
     while (!this.stopRequested) {
       try {
+        const started = Date.now();
         await this.pollOnce();
         backoffMs = 1000;
+        // Belt and braces for the cache-freeze above: a long poll should
+        // take seconds. If one ever returns instantly, do not spin —
+        // wait out the remainder of a second before polling again.
+        const elapsed = Date.now() - started;
+        if (elapsed < 1000) await new Promise((r) => setTimeout(r, 1000 - elapsed));
       } catch (error) {
         const message = (error as Error).message;
         if (message.includes('409')) console.warn('telegram: another process is polling this bot (409); use a separate bot per running copy');
@@ -225,6 +231,12 @@ export class TelegramChannel {
       method: 'POST',
       headers: isForm ? undefined : { 'Content-Type': 'application/json' },
       body: isForm ? body : JSON.stringify(body),
+      // Critical: Next.js caches server fetch responses by default. A
+      // cached empty getUpdates reply makes pollOnce() return instantly
+      // forever, so loop() spins with no wait and pins the dev server
+      // at 100% CPU. Never cache Telegram calls; getUpdates is a
+      // 25-second long poll and must actually wait on Telegram.
+      cache: 'no-store',
     });
     const json = (await res.json()) as { ok: boolean; result?: T; description?: string; error_code?: number };
     if (!json.ok) throw new Error(`${method} failed (${json.error_code ?? res.status}): ${json.description ?? 'unknown error'}`);

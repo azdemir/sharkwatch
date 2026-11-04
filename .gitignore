@@ -7,3 +7,8 @@ data/reports.json
 data/sessions/golden/*
 data/uploads/
 data/.cache/
+# Secrets — never commit these. .env was missing here, which is how it
+# got committed before. .env.example must contain placeholders only.
+.env
+.env.*
+!.env.example

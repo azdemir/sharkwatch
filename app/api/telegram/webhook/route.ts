@@ -25,6 +25,7 @@ async function telegramCall(token: string, method: string, body: object) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      cache: 'no-store',
     });
   } catch {
     // Answering/editing must never block recording the ack itself.

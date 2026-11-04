@@ -19,14 +19,21 @@ export async function GET() {
     username: username,
     link: username ? `https://t.me/${username}` : undefined,
     botUsername: username,
+    // Count only. Subscriber names (and chat IDs) are private and must
+    // never be returned to an unauthenticated caller of this route.
     subscribers: subscribers.length,
-    subscriberNames: subscribers.map((s) => s.name),
     hint: subscribers.length === 0 ? `Send /start to @${username ?? "your bot"} on Telegram, then check here again.` : undefined,
   });
 }
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
+  // This endpoint is unauthenticated, so it must never send to real
+  // subscribers by default — a reviewer hitting it would otherwise
+  // message real people. Real test sends need TELEGRAM_REAL_ALERTS=1.
+  if (process.env.TELEGRAM_REAL_ALERTS?.trim() !== '1') {
+    return NextResponse.json({ error: 'Real Telegram sends are disabled. Set TELEGRAM_REAL_ALERTS=1 and restart the server for a deliberate test send.', sandbox: true, delivered: 0 }, { status: 503 });
+  }
   const channel = getTelegramChannel();
   if (!channel) {
     return NextResponse.json({ error: "TELEGRAM_BOT_TOKEN is not set." }, { status: 503 });

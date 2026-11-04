@@ -15,6 +15,13 @@ export const config = {
   modelApiKey: optional('MODEL_API_KEY') ?? optional('META_KEY'),
   modelApiBaseUrl: optional('MODEL_API_BASE_URL') ?? 'https://api.meta.ai/v1',
   telegramBotToken: optional('TELEGRAM_BOT_TOKEN'),
+  // Real Telegram broadcasts are OFF by default, even when a bot token
+  // is set. A token alone must never let a reviewer (or a Replay) send
+  // a message to real subscribers. Set TELEGRAM_REAL_ALERTS=1 only for
+  // a deliberate Live run by the operator, and restart the server.
+  // Replies to a user who just sent /start themselves are not a
+  // broadcast and are unaffected by this flag.
+  telegramRealAlerts: optional('TELEGRAM_REAL_ALERTS') === '1',
   livePasscode: optional('LIVE_PASSCODE'),
   frameBudget: Number(optional('FRAME_BUDGET') ?? 60_000),
   /** Seconds before an unacknowledged critical alert escalates. */
