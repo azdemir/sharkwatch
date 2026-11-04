@@ -216,6 +216,10 @@ cost of the original Live run. There are 5 recorded patrols in Replay.
 | Tests | Playwright (`npm run test:e2e`) |
 | Hosting | Vercel (https://sharkwatch.vercel.app). One server only — no separate Vite or demo server. |
 | Alerts | Telegram Bot API (long-polling locally, webhook on Vercel, see `lib/telegram-server.ts` and `lib/ack-store.ts`), CAP XML |
+| Shared store | Supabase (Postgres via PostgREST, tables `sharkwatch_acks`, `sharkwatch_subscribers`, `sharkwatch_resolved` — see `supabase/ack-store.sql`) |
+| Meta Muse | Muse Spark (runtime verification) and SAM 3.1 (segmentation) via the Meta Model API; Muse Wonder and Muse Code used during development only — see “Meta models” below |
+| Meta SAM 3.1 | Segmentation of sharks and people in drone frames — see `components/demo/server/meta/sam.ts` |
+| Muse Spark | Verification of traced contacts: shark or not, species, length, nearest person — see `components/demo/server/meta/spark.ts` |
 
 Project layout (the parts that matter):
 
@@ -296,7 +300,7 @@ Set these in `.env` (never commit the file). `.env.example` at the repo root lis
 
 - `MODEL_API_KEY` (preferred) or `META_KEY` (fallback) — Meta Model API key, for Live detection. Without it, Live is disabled and Replay still works.
 - `TELEGRAM_BOT_TOKEN` — for Telegram alerts. Without it, the demo works as before, with no Telegram broadcast. After a bot is set up, send `/start` to the bot to subscribe (bot: @SharkDetectionBot).
-- `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (optional, Vercel) — shared store for acks, subscribers and All clear, so they survive across Vercel instances. Without it, Vercel falls back to the in-memory store and acks can be lost between instances. Run `supabase/ack-store.sql` once to create the tables.
+- `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (optional, Vercel) — shared store for acks, subscribers and All clear, so they survive across Vercel instances. Without it, Vercel falls back to KV if configured, otherwise to the in-memory store, and acks can be lost between instances. Run `supabase/ack-store.sql` once to create the tables.
 
 ## Deploying / limits
 
