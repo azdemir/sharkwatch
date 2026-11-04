@@ -233,6 +233,7 @@ components/demo/        web (App, DroneFeed, MapPanel, Timeline, TrackPanel, Eve
 lib/                    descent, sam-segment-track, telegram, telegram-server, types, detect
 public/descent/         hero-video.mp4, hero-aerial.jpg, great-white/hammerhead/tiger.jpg
 public/                 sharkwatch-logo.svg, favicon.svg
+vite/                   retired pre-Next demo, kept for history, not used by the current app
 ```
 
 ## Meta models
