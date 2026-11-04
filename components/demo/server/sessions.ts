@@ -89,7 +89,7 @@ function demoTelegramChannel(): AlertChannel | undefined {
 }
 // Paid Muse Spark alert-drafting calls in this server process, capped by AGENT_CALL_BUDGET (vite parity).
 let agentCalls = 0;
-function alertServiceFor(bus: EventBus, sessionId: string, clipId: string, dir: string, opts: { live?: boolean; locationName?: string } = {}): AlertService {
+function alertServiceFor(bus: EventBus, sessionId: string, clipId: string, dir: string, opts: { live?: boolean; locationName?: string; withTelegram?: boolean } = {}): AlertService {
   const manifest = loadManifest(clipId);
   // Paid Muse Spark drafting runs ONLY for Live sessions. Replay stays free and
   // template-only, exactly as before — a replay must never spend API calls.
@@ -108,9 +108,18 @@ function alertServiceFor(bus: EventBus, sessionId: string, clipId: string, dir: 
   // Vercel demo will also trigger a real Telegram message to
   // subscribers. The /api/telegram test endpoint and report broadcasts
   // remain gated by TELEGRAM_REAL_ALERTS=1.
-  telegram: demoTelegramChannel(), escalateAfterS: 45, onChange: (alert) => alertHub.publish(alert) });
+  telegram: opts.withTelegram === false ? undefined : demoTelegramChannel(), escalateAfterS: 45, onChange: (alert) => alertHub.publish(alert) });
   alertHub.register(sessionId, service);
   return service;
+}
+// Stateless Replay alert service, used by the SSE route when the
+// in-memory session is missing (the normal Vercel case: POST and SSE
+// landed on different serverless instances). Template draft only, no
+// new API calls. Telegram is sent only on the first connection;
+// on a reconnect (last-event-id present) it is disabled, so a
+// reconnected stream cannot send a duplicate Telegram message.
+export function createStatelessReplayAlertService(bus: EventBus, sessionId: string, clipId: string, dir: string, withTelegram: boolean): AlertService {
+  return alertServiceFor(bus, sessionId, clipId, dir, { withTelegram });
 }
 const REPLAY_LEAD_S = 2;
 const REPLAY_VERDICT_DELAY_S = 1.5;
