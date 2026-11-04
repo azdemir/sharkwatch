@@ -99,12 +99,16 @@ function alertServiceFor(bus: EventBus, sessionId: string, clipId: string, dir: 
     if (agentCalls >= config.agentCallBudget) return templateDraft(r, `Agent call budget (${config.agentCallBudget}) reached: templates used`);
     agentCalls++;
     return draftWithAgent(r);
-  }, // Real Telegram only for a Live session that the operator explicitly
-  // opted into (TELEGRAM_REAL_ALERTS=1). Replay NEVER sends to real
-  // subscribers — that is the path reviewers use, on Vercel and locally —
-  // and Live without the flag also stays in-app only. Alerts still show
-  // in the demo UI either way; only the real Telegram send is gated.
-  telegram: opts.live && config.telegramRealAlerts ? demoTelegramChannel() : undefined, escalateAfterS: 45, onChange: (alert) => alertHub.publish(alert) });
+  }, // 2026-11-04: patrol Telegram restored at the operator's explicit
+  // instruction ("fix it now") after the 2026-11-04 gate stopped Vercel
+  // Replay patrols notifying anyone. Patrol alerts — Replay and Live —
+  // send to real Telegram subscribers again, as they did before that
+  // gate, and are labelled as a simulated exercise in the message.
+  // Trade-off, stated plainly: anyone who runs a patrol on the public
+  // Vercel demo will also trigger a real Telegram message to
+  // subscribers. The /api/telegram test endpoint and report broadcasts
+  // remain gated by TELEGRAM_REAL_ALERTS=1.
+  telegram: demoTelegramChannel(), escalateAfterS: 45, onChange: (alert) => alertHub.publish(alert) });
   alertHub.register(sessionId, service);
   return service;
 }
